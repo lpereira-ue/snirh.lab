@@ -249,3 +249,9 @@ The package now performs comprehensive validation:
 -   ✅ Output format compliance
 
 This ensures high-quality data submission to SNIRH with minimal manual intervention.
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/lpereira-labs/snirh.lab/actions)](https://github.com/lpereira-labs/snirh.lab/actions)
+
+<!-- badges: end -->
