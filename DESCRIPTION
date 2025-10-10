@@ -1,21 +1,18 @@
 Package: snirh.lab
 Type: Package
-Title: Converts a data.frame to the Portuguese Information System for Water Resources (SNIRH) file format
+Title: Convert Laboratory Water-Quality Data to SNIRH Import Format
 Version: 0.1.0
 Date: 2025-09-20
-Author: Luís Pereira
-Authors@R: c(person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
-    comment = c(ORCID = "0000-0002-0628-4847")))
-Description: Converts laboratory analytical data to SNIRH (Sistema Nacional de 
-    Informação de Recursos Hídricos) (https://snirh.apambiente.pt) import format.
-    The package handles data validation, unit conversions, station validation 
-    against the SNIRH database, and formatting according to Portuguese national
-    water monitoring standards. Supports surface water, groundwater, biota,
-    and sediment data matrices with comprehensive quality control and error handling.
-    The data table to import should include the following columns, in this exact order:
-    'snirh_entity', 'snirh_site', 'snirh_id', 'sampling_date', 'value', and 'unit'.
-    All columns must be of type character, except for 'sampling_date',
-    which should be in a valid datetime format.
+Authors@R: c(
+    person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-0628-4847"))
+  )
+Description: Tools to convert tidy laboratory analytical results into the
+    official batch-import format used by Portugal's National Water Resources
+    Information System (SNIRH). Functions validate station identifiers, map
+    parameters and units, and generate CSV files for surface water, ground
+    water, biota, and sediment. Designed for use with 'data.table' and
+    compatible with reproducible workflows.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -33,7 +30,8 @@ Suggests:
     curl (>= 4.0.0),
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    spelling
 VignetteBuilder: knitr
 URL: https://github.com/lpereira-labs/snirh.lab
 BugReports: https://github.com/lpereira-labs/snirh.lab/issues
