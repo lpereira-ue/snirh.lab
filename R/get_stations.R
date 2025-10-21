@@ -18,7 +18,7 @@
 #'   }
 #'
 #' @details
-#' This function downloads the latest station information from the SNIRH
+#' Downloads the latest station information from the SNIRH
 #' geoportal. It requires an internet connection and the 'sf' package for
 #' processing shapefiles.
 #'
@@ -38,7 +38,6 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Get all surface water stations
 #' all_stations <- get_snirh_stations("surface.water")
 #' print(head(all_stations))
@@ -52,7 +51,7 @@
 #' station_info <- get_snirh_stations("surface.water")
 #' station_status <- station_info[station_id %in% my_stations]
 #' print(station_status)
-#' }
+#' 
 #'
 #' @seealso \code{\link{convert_to_snirh}} for the main conversion function
 #' @seealso \code{\link{check_station_status}} for checking specific stations
@@ -67,8 +66,6 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
     cli_abort("Matrix must be 'surface.water' or 'biota'")
   }
 
-  cli_alert_info("Downloading SNIRH station data for {.text {matrix}}...")
-
   # Check internet connectivity
   if (!check_internet_connection(timeout = 10)) {
     cli_abort("Internet connection required to download station data")
@@ -80,10 +77,8 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
   # Filter for active stations if requested
   if (active_only) {
     stations <- stations[status == "ATIVA"]
-    cli_alert_success("Retrieved {.text {nrow(stations)}} active stations")
   } else {
     active_count <- stations[status == "ATIVA", .N]
-    cli_alert_success("Retrieved {.text {nrow(stations)}} total stations ({.text {active_count}} active)")
   }
 
   return(stations)
@@ -117,7 +112,6 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Check status of specific stations
 #' my_stations <- c("07G/01H", "07G/02H", "INVALID_ID")
 #' status_check <- check_station_status(my_stations)
@@ -128,12 +122,9 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
 #' if (nrow(inactive) > 0) {
 #'   print("Stations requiring attention:")
 #'   print(inactive)
-#' }
 #'
 #' # Check only active stations
 #' active_stations <- status_check[active == TRUE]
-#' print(paste("Ready for data conversion:", nrow(active_stations), "stations"))
-#' }
 #'
 #' @seealso \code{\link{get_snirh_stations}} for getting all station information
 #' @seealso \code{\link{convert_to_snirh}} for the main conversion function
@@ -150,8 +141,6 @@ check_station_status <- function(station_ids, matrix = "surface.water", timeout 
 
   # Remove NAs and duplicates
   station_ids <- unique(station_ids[!is.na(station_ids)])
-
-  cli_alert_info("Checking status of {.text {length(station_ids)}} station(s)")
 
   # Get all SNIRH stations
   snirh_stations <- get_snirh_stations(matrix, timeout, active_only = FALSE)
@@ -177,9 +166,6 @@ check_station_status <- function(station_ids, matrix = "surface.water", timeout 
   found_count <- sum(result$found)
   active_count <- sum(result$active, na.rm = TRUE)
   missing_count <- sum(!result$found)
-
-  cli_alert_success("Found: {.text {found_count}}/{.text {length(station_ids)}} stations")
-  cli_alert_success("Active: {.text {active_count}}/{.text {found_count}} found stations")
 
   if (missing_count > 0) {
     missing_ids <- result[found == FALSE, station_id]
@@ -221,7 +207,6 @@ check_station_status <- function(station_ids, matrix = "surface.water", timeout 
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # List all water parameters
 #' water_params <- list_snirh_parameters("water")
 #' print(head(water_params))
@@ -234,7 +219,6 @@ check_station_status <- function(station_ids, matrix = "surface.water", timeout 
 #' all_params <- list_snirh_parameters("all")
 #' unique_types <- unique(all_params$sample_type)
 #' print(paste("Available sample types:", paste(unique_types, collapse = ", ")))
-#' }
 #'
 #' @seealso \code{\link{parameters}} for the complete parameter dataset
 #'
