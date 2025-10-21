@@ -38,7 +38,7 @@ This function is particularly useful for:
 }
 \examples{
 # Check status of specific stations
-my_stations <- c("07G/01H", "07G/02H", "INVALID_ID")
+my_stations <- c("07G/50", "25G/07", "INVALID_ID")
 status_check <- check_station_status(my_stations)
 print(status_check)
 

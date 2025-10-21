@@ -84,10 +84,11 @@ conversion factors and SNIRH symbols for all parameters in the input data.
 
 \examples{
 # Example data structure
-lab_data <- data.table(
-  snirh_entity = "LAB001",
+\donttest{
+lab_data <- data.table::data.table(
+  snirh_entity = "APA",
   station_name = "River station 1",
-  station_id = "07G/01H",  # Must be valid SNIRH station ID
+  station_id = "01F/01",  # Must be valid SNIRH station ID
   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
   parameter = "pH - Campo",
   unit = "Escala Sorensen",
@@ -103,5 +104,6 @@ snirh_data <- convert_to_snirh(lab_data, "biota")
 # Skip station validation if needed (not recommended)
 snirh_data <- convert_to_snirh(lab_data, "surface.water",
                                validate_stations = FALSE)
+}
 
 }
