@@ -2,7 +2,7 @@ Package: snirh.lab
 Type: Package
 Title: Convert Laboratory Water-Quality Data to SNIRH Import Format
 Version: 0.1.0
-Date: 2025-09-20
+Date: 2025-10-21
 Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
