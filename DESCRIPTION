@@ -7,11 +7,11 @@ Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
   )
-Description: Convert laboratory water-quality data into the official file
-    format used by Portugal's 'Sistema Nacional de Informação de Recursos Hídricos'
-    (SNIRH), including parameter/unit mapping, basic validation rules, and export
-    helpers. See APA's SNIRH overview (Agência Portuguesa do Ambiente) <https://apambiente.pt/agua/sistema-nacional-de-informacao-de-recursos-hidricos-snirh>
-    and the government service description <https://www2.gov.pt/servicos/consultar-o-sistema-nacional-de-informacao-de-recursos-hidricos>.
+Description: Convert laboratory data to the Portuguese Information System 
+    for Water Resources (SNIRH) file format. SNIRH is Portugal's national 
+    water resources information system <https://snirh.apambiente.pt/>. 
+    The package validates station data, converts parameters and units, 
+    and generates compliant output files for data submission.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
