@@ -252,6 +252,6 @@ This ensures high-quality data submission to SNIRH with minimal manual intervent
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/lpereira-labs/snirh.lab/actions)](https://github.com/lpereira-labs/snirh.lab/actions)
+[![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/actions)](https://github.com/lpereira-ue/snirh.lab/actions)
 
 <!-- badges: end -->
