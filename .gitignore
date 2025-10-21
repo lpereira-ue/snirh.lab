@@ -9,3 +9,4 @@
 .quarto
 docs
 data-raw/
+build_package.R
