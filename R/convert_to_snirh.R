@@ -100,7 +100,7 @@ SNIRH_STATIONS_URL <- list(
 #'                                validate_stations = FALSE)
 #' }
 #'
-#' @importFrom cli cli_alert_success cat_rule cli_div cli_abort cli_alert_info cli_alert_warning
+#' @importFrom cli cli_abort cli_alert_warning
 #' @importFrom utils download.file unzip
 #' @import data.table
 #' @export
@@ -221,7 +221,6 @@ download_snirh_stations <- function(matrix, timeout = 30) {
       cli_abort("Package 'sf' is required for station validation. Please install it with: install.packages('sf')")
     }
 
-    cli_alert_info("Reading station data from shapefile...")
     stations_sf <- sf::st_read(shp_files[1], quiet = TRUE)
 
     # Convert to data.table and select relevant columns
