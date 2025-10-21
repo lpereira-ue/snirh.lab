@@ -33,7 +33,6 @@ of the package. It can help users:
 }
 }
 \examples{
-\dontrun{
 # List all water parameters
 water_params <- list_snirh_parameters("water")
 print(head(water_params))
@@ -46,7 +45,6 @@ print(head(detailed_params))
 all_params <- list_snirh_parameters("all")
 unique_types <- unique(all_params$sample_type)
 print(paste("Available sample types:", paste(unique_types, collapse = ", ")))
-}
 
 }
 \seealso{

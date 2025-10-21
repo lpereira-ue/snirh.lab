@@ -47,7 +47,7 @@ For example, if converting mg/L to µg/L, the factor would be 1000.}
 parameters
 }
 \description{
-This dataset contains the mapping between laboratory parameter names/units
+Dataset containing the mapping between laboratory parameter names/units
 and their equivalent SNIRH (Sistema Nacional de Informação de Recursos Hídricos)
 database format. It includes conversion factors for unit transformations and
 standardized symbols used in the SNIRH system.
@@ -104,7 +104,6 @@ This dataset should be updated when:
 }
 
 \examples{
-\dontrun{
 # View all available parameters for water samples
 water_params <- parameters[sample_type == "water"]
 print(water_params[, .(param_lab, unit_lab, param_snirh, unit_snirh)])
@@ -120,7 +119,6 @@ print(converted_params[, .(param_lab, unit_lab, unit_snirh, factor)])
 # Get SNIRH symbols for biota parameters
 biota_symbols <- parameters[sample_type == "biota", unique(symbol_snirh)]
 print(biota_symbols)
-}
 
 }
 \references{

@@ -29,7 +29,7 @@ surface water quality. This function can be used to check station status,
 get available station IDs, or validate stations before data conversion.
 }
 \details{
-This function downloads the latest station information from the SNIRH
+Downloads the latest station information from the SNIRH
 geoportal. It requires an internet connection and the 'sf' package for
 processing shapefiles.
 
@@ -51,7 +51,6 @@ Stations can have different status values:
 }
 
 \examples{
-\dontrun{
 # Get all surface water stations
 all_stations <- get_snirh_stations("surface.water")
 print(head(all_stations))
@@ -65,7 +64,7 @@ my_stations <- c("07G/01H", "07G/02H")
 station_info <- get_snirh_stations("surface.water")
 station_status <- station_info[station_id \%in\% my_stations]
 print(station_status)
-}
+
 
 }
 \seealso{

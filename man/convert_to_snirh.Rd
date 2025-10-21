@@ -12,7 +12,7 @@ Must contain the following columns in order: snirh_entity, station_name,
 station_id, sampling_date, parameter, unit, value.}
 
 \item{matrix}{Character string specifying the type of matrix being processed.
-Must be one of: "surface.water", "ground.water", "biota", or "sediment".}
+Must be one of: "surface.water" or "biota".}
 
 \item{validate_stations}{Logical. Whether to validate station IDs against
 the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
@@ -31,7 +31,7 @@ A data.table formatted for SNIRH import with the following structure:
 }
 }
 \description{
-This function cleans and converts laboratory data to the SNIRH (National
+Cleans and converts laboratory data to the SNIRH (National
 Information System on Water Resources) import format. It handles data
 validation, unit conversions, station validation, and formatting according
 to SNIRH standards.
@@ -77,13 +77,12 @@ The input data must be a data.frame/data.table with exactly these columns:
 
 \section{Parameter Conversion}{
 
-The function relies on an internal \code{parameters} dataset that maps laboratory
+Relies on an internal \code{parameters} dataset that maps laboratory
 parameter names and units to SNIRH equivalents. This dataset must contain
 conversion factors and SNIRH symbols for all parameters in the input data.
 }
 
 \examples{
-\dontrun{
 # Example data structure
 lab_data <- data.table(
   snirh_entity = "LAB001",
@@ -98,12 +97,11 @@ lab_data <- data.table(
 # Convert surface water data (with station validation)
 snirh_data <- convert_to_snirh(lab_data, "surface.water")
 
-# Convert groundwater data (no station validation)
-snirh_data <- convert_to_snirh(lab_data, "ground.water")
+# Convert biota data (no station validation)
+snirh_data <- convert_to_snirh(lab_data, "biota")
 
 # Skip station validation if needed (not recommended)
 snirh_data <- convert_to_snirh(lab_data, "surface.water",
                                validate_stations = FALSE)
-}
 
 }

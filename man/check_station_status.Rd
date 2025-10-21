@@ -37,7 +37,6 @@ This function is particularly useful for:
 }
 }
 \examples{
-\dontrun{
 # Check status of specific stations
 my_stations <- c("07G/01H", "07G/02H", "INVALID_ID")
 status_check <- check_station_status(my_stations)
@@ -48,12 +47,10 @@ inactive <- status_check[active == FALSE | is.na(active)]
 if (nrow(inactive) > 0) {
   print("Stations requiring attention:")
   print(inactive)
-}
+  }
 
 # Check only active stations
 active_stations <- status_check[active == TRUE]
-print(paste("Ready for data conversion:", nrow(active_stations), "stations"))
-}
 
 }
 \seealso{
