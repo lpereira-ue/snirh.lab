@@ -1,26 +1,23 @@
 # Constants ----
-VALID_MATRICES <- c("surface.water", "ground.water", "biota", "sediment")
+VALID_MATRICES <- c("surface.water", "biota")
 REQUIRED_COLUMNS <- c("snirh_entity", "station_name", "station_id", "sampling_date",
                       "parameter", "unit", "value")
 
 # Network configuration
 NETWORK_CONFIG <- list(
   "surface.water" = list(network = "QUAL", sample_type = "water", validate_stations = TRUE),
-  "ground.water" = list(network = "QUALSUB", sample_type = "water", validate_stations = FALSE),
-  "biota" = list(network = "QUAL", sample_type = "biota", validate_stations = TRUE),
-  "sediment" = list(network = "SEDIMENT", sample_type = "sediment", validate_stations = FALSE)
+  "biota" = list(network = "QUAL", sample_type = "biota", validate_stations = TRUE)
 )
 
 # SNIRH Station URLs
 SNIRH_STATIONS_URL <- list(
   "surface.water" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsup_vw.zip",
-  "biota" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsup_vw.zip",
-  "ground.water" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsub_vw.zip"
+  "biota" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsup_vw.zip"
 )
 
 #' Convert data to SNIRH file format
 #'
-#' This function cleans and converts laboratory data to the SNIRH (National
+#' Cleans and converts laboratory data to the SNIRH (National
 #' Information System on Water Resources) import format. It handles data
 #' validation, unit conversions, station validation, and formatting according
 #' to SNIRH standards.
@@ -29,7 +26,7 @@ SNIRH_STATIONS_URL <- list(
 #'   Must contain the following columns in order: snirh_entity, station_name,
 #'   station_id, sampling_date, parameter, unit, value.
 #' @param matrix Character string specifying the type of matrix being processed.
-#'   Must be one of: "surface.water", "ground.water", "biota", or "sediment".
+#'   Must be one of: "surface.water" or "biota".
 #' @param validate_stations Logical. Whether to validate station IDs against
 #'   the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
 #'   Requires internet connection.
@@ -78,12 +75,11 @@ SNIRH_STATIONS_URL <- list(
 #' }
 #'
 #' @section Parameter Conversion:
-#' The function relies on an internal `parameters` dataset that maps laboratory
+#' Relies on an internal `parameters` dataset that maps laboratory
 #' parameter names and units to SNIRH equivalents. This dataset must contain
 #' conversion factors and SNIRH symbols for all parameters in the input data.
 #'
 #' @examples
-#' \dontrun{
 #' # Example data structure
 #' lab_data <- data.table(
 #'   snirh_entity = "LAB001",
@@ -98,26 +94,18 @@ SNIRH_STATIONS_URL <- list(
 #' # Convert surface water data (with station validation)
 #' snirh_data <- convert_to_snirh(lab_data, "surface.water")
 #'
-#' # Convert groundwater data (no station validation)
-#' snirh_data <- convert_to_snirh(lab_data, "ground.water")
+#' # Convert biota data (no station validation)
+#' snirh_data <- convert_to_snirh(lab_data, "biota")
 #'
 #' # Skip station validation if needed (not recommended)
 #' snirh_data <- convert_to_snirh(lab_data, "surface.water",
 #'                                validate_stations = FALSE)
-#' }
 #'
 #' @importFrom cli cli_alert_success cat_rule cli_div cli_abort cli_alert_info cli_alert_warning
 #' @importFrom utils download.file unzip
 #' @import data.table
 #' @export
 convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 30) {
-
-  # Initialize CLI output
-  cli_div(class = "text", theme = list(.text = list(color = "yellow")))
-  cat("\n")
-  cat_rule(left = "Converting external data to SNIRH input file format",
-           col = "steelblue")
-  cat("\n")
 
   # Input validation
   validate_inputs(data, matrix)
@@ -128,13 +116,6 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 3
   # Set default station validation based on matrix type
   if (is.null(validate_stations)) {
     validate_stations <- config$validate_stations
-  }
-
-  cli_alert_success("Processing data of {.text {matrix}} matrix")
-  cli_alert_success("Network: {.text {config$network}}, Sample type: {.text {config$sample_type}}")
-
-  if (validate_stations) {
-    cli_alert_info("Station validation: {.text {ifelse(validate_stations, 'ENABLED', 'DISABLED')}}")
   }
 
   # Filter parameters for the specified sample type
@@ -167,8 +148,6 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 3
   # Format for SNIRH output
   data_final <- format_for_snirh(data_converted, config$network)
 
-  cli_alert_success("Conversion completed successfully!")
-
   return(data_final)
 }
 
@@ -176,6 +155,7 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 3
 #' @param data Input data
 #' @param matrix Matrix type
 #' @noRd
+#' @keywords internal
 validate_inputs <- function(data, matrix) {
   if (!matrix %in% VALID_MATRICES) {
     cli_abort("Matrix type must be one of: {.val {VALID_MATRICES}}")
@@ -194,28 +174,13 @@ validate_inputs <- function(data, matrix) {
 #' @param timeout Timeout in seconds (only used for base R fallback)
 #' @return Logical indicating if internet is available
 #' @noRd
-check_internet_connection <- function(timeout = 10) {
-  # Use curl's has_internet() if available - much more reliable
-  if (requireNamespace("curl", quietly = TRUE)) {
-    return(curl::has_internet())
-  } else {
-    # Fallback to base R method only if curl is not available
-    tryCatch({
-      # Set timeout on the connection
-      con <- url("https://www.google.com", open = "rb")
-      on.exit(close(con))
-
-      # Use base R timeout mechanism
-      old_timeout <- getOption("timeout")
-      options(timeout = timeout)
-      on.exit(options(timeout = old_timeout), add = TRUE)
-
-      readLines(con, n = 1)
-      return(TRUE)
-    }, error = function(e) {
-      return(FALSE)
-    })
+check_internet_connection <- function() {
+  if (!requireNamespace("curl", quietly = TRUE)) {
+    message("Package 'curl' is not installed. Please install it with:\n  install.packages('curl')")
+    return(FALSE)
   }
+
+  curl::has_internet()
 }
 
 #' Download and parse SNIRH station data
@@ -223,6 +188,7 @@ check_internet_connection <- function(timeout = 10) {
 #' @param timeout Download timeout in seconds
 #' @return data.table with station information
 #' @noRd
+#' @keywords internal
 download_snirh_stations <- function(matrix, timeout = 30) {
   if (!matrix %in% names(SNIRH_STATIONS_URL)) {
     cli_abort("Station validation not available for matrix type: {.val {matrix}}")
@@ -282,8 +248,6 @@ download_snirh_stations <- function(matrix, timeout = 30) {
       status = get(estado_col)
     )]
 
-    cli_alert_success("Successfully downloaded data for {.text {nrow(stations_clean)}} stations")
-
     # Clean up temporary files
     unlink(temp_zip)
     unlink(temp_dir, recursive = TRUE)
@@ -309,8 +273,6 @@ download_snirh_stations <- function(matrix, timeout = 30) {
 #' @param timeout Download timeout
 #' @noRd
 validate_snirh_stations <- function(data, matrix, timeout = 30) {
-  cli_alert_info("Validating station IDs against SNIRH database...")
-
   # Check internet connection
   if (!check_internet_connection(timeout = 10)) {
     cli_abort(c(
@@ -326,8 +288,6 @@ validate_snirh_stations <- function(data, matrix, timeout = 30) {
   if (length(data_stations) == 0) {
     cli_abort("No valid station IDs found in data")
   }
-
-  cli_alert_info("Checking {.text {length(data_stations)}} unique station ID(s)")
 
   # Download SNIRH station data
   snirh_stations <- download_snirh_stations(matrix, timeout)
@@ -355,16 +315,14 @@ validate_snirh_stations <- function(data, matrix, timeout = 30) {
     ))
   }
 
-  cli_alert_success("All station IDs validated successfully")
-
   # Report station validation results
   active_stations <- station_status[status == "ATIVA", .N]
-  cli_alert_info("Active stations found: {.text {active_stations}}")
 }
 
 #' Validate data structure
 #' @param data Input data as data.table
 #' @noRd
+#' @keywords internal
 validate_data_structure <- function(data) {
   if (!all(REQUIRED_COLUMNS == names(data))) {
     cli_abort(c(
@@ -379,6 +337,7 @@ validate_data_structure <- function(data) {
 #' @param data Input data.table
 #' @return Cleaned data.table
 #' @noRd
+#' @keywords internal
 clean_empty_data <- function(data) {
   initial_rows <- nrow(data)
   initial_cols <- ncol(data)
@@ -393,18 +352,13 @@ clean_empty_data <- function(data) {
   data_cleaned[, station_id := trimws(station_id, whitespace = "[ \\h\\v\t\n\r]")]
   data_cleaned[, value := trimws(value, whitespace = "[ \\h\\v\t\n\r]")]
 
-  # Report cleaning results
-  cli_alert_success("Original number of rows: {.text {initial_rows}}")
-  cli_alert_success("Removed empty rows: {.text {initial_rows - nrow(data_cleaned)}}")
-  cli_alert_success("Removed empty columns: {.text {initial_cols - ncol(data_cleaned)}}")
-  cli_alert_success("Rows to be processed: {.text {nrow(data_cleaned)}}")
-
   return(data_cleaned)
 }
 
 #' Validate data integrity (nulls and duplicates)
 #' @param data Cleaned data.table
 #' @noRd
+#' @keywords internal
 validate_data_integrity <- function(data) {
   # Check for null values in critical columns
   # Exclude IGA parameter which has no unit
@@ -437,6 +391,7 @@ validate_data_integrity <- function(data) {
 #' @param data Input data.table
 #' @return Data.table with pH temperature extracted as separate rows
 #' @noRd
+#' @keywords internal
 extract_ph_temperature <- function(data) {
   # Find pH measurements with temperature data
   temp_ph <- data[parameter %like% "pH" & value %like% "a"]
@@ -444,8 +399,6 @@ extract_ph_temperature <- function(data) {
   if (nrow(temp_ph) == 0) {
     return(data)
   }
-
-  cli_alert_success("Extracting pH temperature data from {.text {nrow(temp_ph)}} records")
 
   # Split pH and temperature values
   temp_ph[, c("ph", "temp_ph") := tstrsplit(value, " a ", fixed = TRUE)]
@@ -487,9 +440,8 @@ extract_ph_temperature <- function(data) {
 #' @param data Input data.table
 #' @return Data.table with cleaned values
 #' @noRd
+#' @keywords internal
 clean_values <- function(data) {
-  cli_alert_success("Cleaning and standardizing measurement values")
-
   data[, value_clean := value]
 
   # Apply cleaning transformations
@@ -527,9 +479,8 @@ clean_values <- function(data) {
 #' @param relevant_params Parameters dataset filtered for sample type
 #' @return Data.table with converted values
 #' @noRd
+#' @keywords internal
 convert_units <- function(data, relevant_params) {
-  cli_alert_success("Converting values to SNIRH units")
-
   # Separate flags from numeric values
   data[, `:=`(
     flag = fifelse(
@@ -562,8 +513,6 @@ convert_units <- function(data, relevant_params) {
   # Create final value with flags
   data_converted[, value_final := paste0(fifelse(is.na(flag), "", flag), value_converted)]
 
-  cli_alert_success("Successfully converted {.text {nrow(data_converted)}} measurements")
-
   return(data_converted)
 }
 
@@ -572,9 +521,8 @@ convert_units <- function(data, relevant_params) {
 #' @param network Network identifier
 #' @return Final formatted data.table
 #' @noRd
+#' @keywords internal
 format_for_snirh <- function(data_converted, network) {
-  cli_alert_success("Formatting data for SNIRH output")
-
   # Select final columns and reshape
   final_cols <- c("snirh_entity", "station_id", "sampling_date",
                   "symbol_snirh", "value_final")
@@ -606,6 +554,7 @@ format_for_snirh <- function(data_converted, network) {
 #' @param network Network identifier
 #' @return Template-formatted data.table
 #' @noRd
+#' @keywords internal
 apply_snirh_template <- function(data_wide, network) {
   dt_out <- copy(data_wide)
   setorder(dt_out, station_id, sampling_date)
@@ -650,6 +599,7 @@ apply_snirh_template <- function(data_wide, network) {
 #' @param dt_out Data.table with station information
 #' @return Data.table with station headers inserted
 #' @noRd
+#' @keywords internal
 insert_station_headers <- function(dt_out) {
   # Find positions for station headers
   breaks <- which(dt_out$index == 1)
