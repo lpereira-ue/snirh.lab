@@ -81,10 +81,11 @@ SNIRH_STATIONS_URL <- list(
 #'
 #' @examples
 #' # Example data structure
-#' lab_data <- data.table(
-#'   snirh_entity = "LAB001",
+#' \donttest{
+#' lab_data <- data.table::data.table(
+#'   snirh_entity = "APA",
 #'   station_name = "River station 1",
-#'   station_id = "07G/01H",  # Must be valid SNIRH station ID
+#'   station_id = "01F/01",  # Must be valid SNIRH station ID
 #'   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
 #'   parameter = "pH - Campo",
 #'   unit = "Escala Sorensen",
@@ -100,6 +101,7 @@ SNIRH_STATIONS_URL <- list(
 #' # Skip station validation if needed (not recommended)
 #' snirh_data <- convert_to_snirh(lab_data, "surface.water",
 #'                                validate_stations = FALSE)
+#' }
 #'
 #' @importFrom cli cli_alert_success cat_rule cli_div cli_abort cli_alert_info cli_alert_warning
 #' @importFrom utils download.file unzip
@@ -199,8 +201,6 @@ download_snirh_stations <- function(matrix, timeout = 30) {
   temp_zip <- tempfile(fileext = ".zip")
   temp_dir <- tempdir()
 
-  cli_alert_info("Downloading SNIRH station data...")
-
   tryCatch({
     # Download the ZIP file
     utils::download.file(url, temp_zip, mode = "wb", timeout = timeout, quiet = TRUE)
@@ -266,6 +266,7 @@ download_snirh_stations <- function(matrix, timeout = 30) {
   })
 }
 
+
 #' Validate station IDs against SNIRH database
 #' @param data Input data.table
 #' @param matrix Matrix type
@@ -273,7 +274,7 @@ download_snirh_stations <- function(matrix, timeout = 30) {
 #' @noRd
 validate_snirh_stations <- function(data, matrix, timeout = 30) {
   # Check internet connection
-  if (!check_internet_connection(timeout = 10)) {
+  if (!check_internet_connection()) {
     cli_abort(c(
       "Internet connection required for station validation",
       "i" = "Please check your connection or set validate_stations = FALSE"
@@ -354,6 +355,7 @@ clean_empty_data <- function(data) {
   return(data_cleaned)
 }
 
+
 #' Validate data integrity (nulls and duplicates)
 #' @param data Cleaned data.table
 #' @noRd
@@ -369,9 +371,10 @@ validate_data_integrity <- function(data) {
   ]
   total_nulls <- sum(unlist(null_counts))
 
-  cols_nulls <- names(null_counts)[
-    null_counts[, sapply(.SD, function(x) x > 0)]
-  ]
+  # cols_nulls <- names(null_counts)[
+  #   null_counts[, sapply(.SD, function(x) x > 0)]
+  # ]
+  cols_nulls <- names(null_counts)[unlist(null_counts) > 0]
 
   if (total_nulls > 0) {
     cli_abort(c(
@@ -385,6 +388,7 @@ validate_data_integrity <- function(data) {
     cli_abort("Duplicate records found for same station_id + sampling_date + parameter combination")
   }
 }
+
 
 #' Extract pH temperature measurements
 #' @param data Input data.table
@@ -435,6 +439,7 @@ extract_ph_temperature <- function(data) {
   return(data_all)
 }
 
+
 #' Clean and standardize measurement values
 #' @param data Input data.table
 #' @return Data.table with cleaned values
@@ -472,6 +477,7 @@ clean_values <- function(data) {
 
   return(data)
 }
+
 
 #' Convert values to SNIRH units
 #' @param data Data.table with cleaned values
@@ -515,6 +521,7 @@ convert_units <- function(data, relevant_params) {
   return(data_converted)
 }
 
+
 #' Format data for SNIRH output
 #' @param data_converted Data.table with converted values
 #' @param network Network identifier
@@ -547,6 +554,7 @@ format_for_snirh <- function(data_converted, network) {
 
   return(data_formatted)
 }
+
 
 #' Apply SNIRH template formatting
 #' @param data_wide Wide format data
@@ -593,6 +601,7 @@ apply_snirh_template <- function(data_wide, network) {
 
   return(dt_out)
 }
+
 
 #' Insert station headers into formatted data
 #' @param dt_out Data.table with station information

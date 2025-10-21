@@ -47,7 +47,7 @@
 #' print(paste("Active stations:", nrow(active_stations)))
 #'
 #' # Check if specific stations are active
-#' my_stations <- c("07G/01H", "07G/02H")
+#' my_stations <- c("07H/50", "25G/07")
 #' station_info <- get_snirh_stations("surface.water")
 #' station_status <- station_info[station_id %in% my_stations]
 #' print(station_status)
@@ -67,7 +67,7 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
   }
 
   # Check internet connectivity
-  if (!check_internet_connection(timeout = 10)) {
+  if (!check_internet_connection()) {
     cli_abort("Internet connection required to download station data")
   }
 
@@ -113,7 +113,7 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
 #'
 #' @examples
 #' # Check status of specific stations
-#' my_stations <- c("07G/01H", "07G/02H", "INVALID_ID")
+#' my_stations <- c("07G/50", "25G/07", "INVALID_ID")
 #' status_check <- check_station_status(my_stations)
 #' print(status_check)
 #'

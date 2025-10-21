@@ -60,7 +60,7 @@ active_stations <- get_snirh_stations("surface.water", active_only = TRUE)
 print(paste("Active stations:", nrow(active_stations)))
 
 # Check if specific stations are active
-my_stations <- c("07G/01H", "07G/02H")
+my_stations <- c("07H/50", "25G/07")
 station_info <- get_snirh_stations("surface.water")
 station_status <- station_info[station_id \%in\% my_stations]
 print(station_status)
