@@ -7,12 +7,11 @@ Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
   )
-Description: Tools to convert tidy laboratory analytical results into the
-    official batch-import format used by Portugal's National Water Resources
-    Information System (SNIRH). Functions validate station identifiers, map
-    parameters and units, and generate CSV files for surface water, ground
-    water, biota, and sediment. Designed for use with 'data.table' and
-    compatible with reproducible workflows.
+Description: Convert laboratory water-quality data into the official file
+    format used by Portugal's 'Sistema Nacional de Informação de Recursos Hídricos'
+    (SNIRH), including parameter/unit mapping, basic validation rules, and export
+    helpers. See APA's SNIRH overview (Agência Portuguesa do Ambiente) <https://apambiente.pt/agua/sistema-nacional-de-informacao-de-recursos-hidricos-snirh>
+    and the government service description <https://www2.gov.pt/servicos/consultar-o-sistema-nacional-de-informacao-de-recursos-hidricos>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -33,5 +32,5 @@ Suggests:
     rmarkdown,
     spelling
 VignetteBuilder: knitr
-URL: https://github.com/lpereira-labs/snirh.lab
-BugReports: https://github.com/lpereira-labs/snirh.lab/issues
+URL: https://github.com/lpereira-ue/snirh.lab
+BugReports: https://github.com/lpereira-ue/snirh.lab/issues
