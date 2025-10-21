@@ -51,7 +51,7 @@
 #' station_info <- get_snirh_stations("surface.water")
 #' station_status <- station_info[station_id %in% my_stations]
 #' print(station_status)
-#' 
+#'
 #'
 #' @seealso \code{\link{convert_to_snirh}} for the main conversion function
 #' @seealso \code{\link{check_station_status}} for checking specific stations
@@ -122,6 +122,7 @@ get_snirh_stations <- function(matrix = "surface.water", timeout = 30, active_on
 #' if (nrow(inactive) > 0) {
 #'   print("Stations requiring attention:")
 #'   print(inactive)
+#'   }
 #'
 #' # Check only active stations
 #' active_stations <- status_check[active == TRUE]
