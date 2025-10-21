@@ -1,6 +1,6 @@
 #' Parameter conversion table for SNIRH format
 #'
-#' This dataset contains the mapping between laboratory parameter names/units
+#' Dataset containing the mapping between laboratory parameter names/units
 #' and their equivalent SNIRH (Sistema Nacional de Informação de Recursos Hídricos)
 #' database format. It includes conversion factors for unit transformations and
 #' standardized symbols used in the SNIRH system.
@@ -81,7 +81,6 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # View all available parameters for water samples
 #' water_params <- parameters[sample_type == "water"]
 #' print(water_params[, .(param_lab, unit_lab, param_snirh, unit_snirh)])
@@ -97,7 +96,6 @@
 #' # Get SNIRH symbols for biota parameters
 #' biota_symbols <- parameters[sample_type == "biota", unique(symbol_snirh)]
 #' print(biota_symbols)
-#' }
 #'
 #' @seealso
 #' \code{\link{convert_to_snirh}} for the main conversion function that uses this data
