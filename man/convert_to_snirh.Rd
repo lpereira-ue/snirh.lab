@@ -98,9 +98,6 @@ lab_data <- data.table::data.table(
 # Convert surface water data (with station validation)
 snirh_data <- convert_to_snirh(lab_data, "surface.water")
 
-# Convert biota data (no station validation)
-snirh_data <- convert_to_snirh(lab_data, "biota")
-
 # Skip station validation if needed (not recommended)
 snirh_data <- convert_to_snirh(lab_data, "surface.water",
                                validate_stations = FALSE)
