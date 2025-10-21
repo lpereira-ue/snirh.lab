@@ -37,6 +37,7 @@ This function is particularly useful for:
 }
 }
 \examples{
+\donttest{
 # Check status of specific stations
 my_stations <- c("07G/50", "25G/07", "INVALID_ID")
 status_check <- check_station_status(my_stations)
@@ -51,6 +52,7 @@ if (nrow(inactive) > 0) {
 
 # Check only active stations
 active_stations <- status_check[active == TRUE]
+}
 
 }
 \seealso{

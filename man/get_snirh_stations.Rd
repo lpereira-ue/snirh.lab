@@ -51,6 +51,7 @@ Stations can have different status values:
 }
 
 \examples{
+\donttest{
 # Get all surface water stations
 all_stations <- get_snirh_stations("surface.water")
 print(head(all_stations))
@@ -64,7 +65,7 @@ my_stations <- c("07H/50", "25G/07")
 station_info <- get_snirh_stations("surface.water")
 station_status <- station_info[station_id \%in\% my_stations]
 print(station_status)
-
+}
 
 }
 \seealso{

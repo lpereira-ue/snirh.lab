@@ -153,6 +153,7 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 3
   return(data_final)
 }
 
+
 #' Validate function inputs
 #' @param data Input data
 #' @param matrix Matrix type
@@ -172,6 +173,7 @@ validate_inputs <- function(data, matrix) {
   }
 }
 
+
 #' Check internet connectivity
 #' @return Logical indicating if internet is available
 #' @noRd
@@ -183,6 +185,7 @@ check_internet_connection <- function() {
 
   curl::has_internet()
 }
+
 
 #' Download and parse SNIRH station data
 #' @param matrix Matrix type
@@ -199,7 +202,8 @@ download_snirh_stations <- function(matrix, timeout = 30) {
 
   # Create temporary files
   temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempdir()
+  temp_dir <- tempfile(pattern = "snirh_")
+  dir.create(temp_dir)
 
   tryCatch({
     # Download the ZIP file
@@ -319,6 +323,7 @@ validate_snirh_stations <- function(data, matrix, timeout = 30) {
   active_stations <- station_status[status == "ATIVA", .N]
 }
 
+
 #' Validate data structure
 #' @param data Input data as data.table
 #' @noRd
@@ -332,6 +337,7 @@ validate_data_structure <- function(data) {
     ))
   }
 }
+
 
 #' Clean empty rows and columns from data
 #' @param data Input data.table
