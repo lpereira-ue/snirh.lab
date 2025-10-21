@@ -171,7 +171,6 @@ validate_inputs <- function(data, matrix) {
 }
 
 #' Check internet connectivity
-#' @param timeout Timeout in seconds (only used for base R fallback)
 #' @return Logical indicating if internet is available
 #' @noRd
 check_internet_connection <- function() {
