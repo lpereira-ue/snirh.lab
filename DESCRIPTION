@@ -1,13 +1,13 @@
 Package: snirh.lab
 Type: Package
-Title: Convert Laboratory Water-Quality Data to SNIRH Import Format
+Title: Convert Laboratory Water-Quality Data to 'SNIRH' Import Format
 Version: 0.1.0
 Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
   )
 Description: Convert laboratory data to the Portuguese Information System 
-    for Water Resources (SNIRH) file format. SNIRH is Portugal's national 
+    for Water Resources 'SNIRH' file format. 'SNIRH' is Portugal's national 
     water resources information system <https://snirh.apambiente.pt/>. 
     The package validates station data, converts parameters and units, 
     and generates compliant output files for data submission.
@@ -27,10 +27,8 @@ Suggests:
     sf (>= 1.0.0),
     curl (>= 4.0.0),
     testthat (>= 3.0.0),
-    knitr,
     rmarkdown,
     spelling
-VignetteBuilder: knitr
 URL: https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
 Config/testthat/edition: 3
