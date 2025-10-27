@@ -161,7 +161,7 @@ result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 
 # For slow connections
-result <- convert_to_snirh(lab_data, "surface.water", timeout = 60)
+result <- convert_to_snirh(lab_data, "surface.water")
 ```
 
 ## Advanced Usage
@@ -216,7 +216,6 @@ process_lab_files <- function(file_paths) {
 - May require system dependencies on Linux
 
 ### Slow downloads
-- Increase timeout parameter
 - Check network connection
 - Try during off-peak hours
 
