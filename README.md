@@ -2,7 +2,6 @@
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab)
-[![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/workflows/R-CMD-check/badge.svg)](https://github.com/lpereira-ue/snirh.lab/actions)
 <!-- badges: end -->
 
 ## Overview
@@ -31,8 +30,11 @@ install.packages("snirh.lab")
 ### Development version from GitHub
 
 ```r
-# install.packages("devtools")
-devtools::install_github("lpereira-ue/snirh.lab")
+# Install pak if needed
+install.packages("pak")
+
+# Then install from GitHub
+pak::pak("lpereira-ue/snirh.lab")
 ```
 
 ### Dependencies
@@ -78,6 +80,7 @@ lab_data <- data.table(
 
 # Convert with automatic station validation
 result <- convert_to_snirh(lab_data, "surface.water")
+print(result)
 ```
 
 ### Station Validation
@@ -99,13 +102,6 @@ filtered_data <- lab_data[station_id %in% active_stations]
 # Get all active surface water stations
 active_stations <- get_snirh_stations("surface.water", active_only = TRUE)
 print(paste("Available stations:", nrow(active_stations)))
-
-# Find stations in your region (example with spatial filtering)
-if (requireNamespace("sf", quietly = TRUE)) {
-  library(sf)
-  stations_sf <- get_snirh_stations("surface.water")
-  # Add your spatial filtering logic here
-}
 ```
 
 ### List Parameters
