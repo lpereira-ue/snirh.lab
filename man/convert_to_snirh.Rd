@@ -4,7 +4,7 @@
 \alias{convert_to_snirh}
 \title{Convert data to SNIRH file format}
 \usage{
-convert_to_snirh(data, matrix, validate_stations = NULL, timeout = 30)
+convert_to_snirh(data, matrix, validate_stations = NULL)
 }
 \arguments{
 \item{data}{A data.frame or data.table containing the original laboratory data.
@@ -17,9 +17,6 @@ Must be one of: "surface.water" or "biota".}
 \item{validate_stations}{Logical. Whether to validate station IDs against
 the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
 Requires internet connection.}
-
-\item{timeout}{Numeric. Timeout in seconds for downloading station data.
-Default is 30 seconds.}
 }
 \value{
 A data.table formatted for SNIRH import with the following structure:

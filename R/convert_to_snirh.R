@@ -1,4 +1,4 @@
-# Constants ----
+# Constants
 VALID_MATRICES <- c("surface.water", "biota")
 REQUIRED_COLUMNS <- c("snirh_entity", "station_name", "station_id", "sampling_date",
                       "parameter", "unit", "value")
@@ -30,8 +30,6 @@ SNIRH_STATIONS_URL <- list(
 #' @param validate_stations Logical. Whether to validate station IDs against
 #'   the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
 #'   Requires internet connection.
-#' @param timeout Numeric. Timeout in seconds for downloading station data.
-#'   Default is 30 seconds.
 #'
 #' @return A data.table formatted for SNIRH import with the following structure:
 #'   - First row contains network specification (REDE=NETWORK_NAME)
@@ -104,7 +102,7 @@ SNIRH_STATIONS_URL <- list(
 #' @importFrom utils download.file unzip
 #' @import data.table
 #' @export
-convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 30) {
+convert_to_snirh <- function(data, matrix, validate_stations = NULL) {
 
   # Input validation
   validate_inputs(data, matrix)
@@ -126,7 +124,7 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL, timeout = 3
 
   # Validate stations against SNIRH database if required
   if (validate_stations && config$validate_stations) {
-    validate_snirh_stations(data, matrix, timeout)
+    validate_snirh_stations(data, matrix)
   }
 
   # Clean data (remove empty rows/columns)
@@ -171,108 +169,11 @@ validate_inputs <- function(data, matrix) {
 }
 
 
-#' Check internet connectivity
-#' @return Logical indicating if internet is available
-#' @noRd
-check_internet_connection <- function() {
-  if (!requireNamespace("curl", quietly = TRUE)) {
-    message("Package 'curl' is not installed. Please install it with:\n  install.packages('curl')")
-    return(FALSE)
-  }
-
-  curl::has_internet()
-}
-
-
-#' Download and parse SNIRH station data
-#' @param matrix Matrix type
-#' @param timeout Download timeout in seconds
-#' @return data.table with station information
-#' @noRd
-#' @keywords internal
-download_snirh_stations <- function(matrix, timeout = 30) {
-  if (!matrix %in% names(SNIRH_STATIONS_URL)) {
-    cli_abort("Station validation not available for matrix type: {.val {matrix}}")
-  }
-
-  url <- SNIRH_STATIONS_URL[[matrix]]
-
-  # Create temporary files
-  temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempfile(pattern = "snirh_")
-  dir.create(temp_dir)
-
-  tryCatch({
-    # Download the ZIP file
-    utils::download.file(url, temp_zip, mode = "wb", timeout = timeout, quiet = TRUE)
-
-    # Extract the ZIP file
-    utils::unzip(temp_zip, exdir = temp_dir)
-
-    # Find the shapefile
-    shp_files <- list.files(temp_dir, pattern = "\\.shp$", full.names = TRUE, recursive = TRUE)
-
-    if (length(shp_files) == 0) {
-      cli_abort("No shapefile found in downloaded data")
-    }
-
-    # Read the shapefile (requires sf package)
-    if (!requireNamespace("sf", quietly = TRUE)) {
-      cli_abort("Package 'sf' is required for station validation. Please install it with: install.packages('sf')")
-    }
-
-    stations_sf <- sf::st_read(shp_files[1], quiet = TRUE)
-
-    # Convert to data.table and select relevant columns
-    stations_dt <- as.data.table(stations_sf)
-
-    # Check if required columns exist (might vary in naming)
-    required_cols <- c("codigo", "estado")
-    available_cols <- names(stations_dt)
-
-    # Try to find columns with similar names
-    codigo_col <- available_cols[grepl("codigo|Codigo|CODIGO|cod|referencia|Referencia",
-                                       available_cols, ignore.case = TRUE)][1]
-    estado_col <- available_cols[grepl("estado|Estado|ESTADO|status",
-                                       available_cols, ignore.case = TRUE)][1]
-
-    if (is.na(codigo_col) || is.na(estado_col)) {
-      cli_alert_warning("Expected columns not found. Available columns: {.val {available_cols}}")
-      cli_abort("Required columns 'codigo' and 'estado' not found in station data")
-    }
-
-    # Select and standardize column names
-    stations_clean <- stations_dt[, .(
-      station_id = get(codigo_col),
-      status = get(estado_col)
-    )]
-
-    # Clean up temporary files
-    unlink(temp_zip)
-    unlink(temp_dir, recursive = TRUE)
-
-    return(stations_clean)
-
-  }, error = function(e) {
-    # Clean up on error
-    if (file.exists(temp_zip)) unlink(temp_zip)
-    if (dir.exists(temp_dir)) unlink(temp_dir, recursive = TRUE)
-
-    cli_abort(c(
-      "Failed to download or process SNIRH station data",
-      "i" = "Error: {.text {e$message}}",
-      "i" = "Please check your internet connection or try again later"
-    ))
-  })
-}
-
-
 #' Validate station IDs against SNIRH database
 #' @param data Input data.table
 #' @param matrix Matrix type
-#' @param timeout Download timeout
 #' @noRd
-validate_snirh_stations <- function(data, matrix, timeout = 30) {
+validate_snirh_stations <- function(data, matrix) {
   # Check internet connection
   if (!check_internet_connection()) {
     cli_abort(c(
@@ -290,7 +191,7 @@ validate_snirh_stations <- function(data, matrix, timeout = 30) {
   }
 
   # Download SNIRH station data
-  snirh_stations <- download_snirh_stations(matrix, timeout)
+  snirh_stations <- download_snirh_stations(matrix)
 
   # Check which stations exist in SNIRH
   missing_stations <- setdiff(data_stations, snirh_stations$station_id)

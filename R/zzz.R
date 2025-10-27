@@ -18,7 +18,7 @@ utils::globalVariables(c(
   "factor", "sample_type",
 
   # Station validation columns
-  "status", "Codigo", "Estado",
+  "status", "codigo", "estado",
 
   # Temporary/utility columns
   "total", "parameter_fault",
