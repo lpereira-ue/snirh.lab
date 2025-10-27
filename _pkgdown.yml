@@ -1,4 +1,18 @@
-url: ~
 template:
   bootstrap: 5
+url: https://lpereira-ue.github.io/snirh.lab/
 
+navbar:
+  structure:
+    left:  [reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/lpereira-ue/snirh.lab
+
+articles:
+- title: Articles
+  contents:
+  - starts_with("getting-")
+  - starts_with("data-")
