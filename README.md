@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab)
+[![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/lpereira-ue/snirh.lab/graph/badge.svg)](https://app.codecov.io/gh/lpereira-ue/snirh.lab)
 <!-- badges: end -->
 
 ## Overview
