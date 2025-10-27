@@ -1,4 +1,3 @@
-# .github/workflows/pkgdown.yaml
 name: pkgdown
 
 on:
@@ -6,6 +5,7 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+# required for Pages
 permissions:
   contents: read
   pages: write
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,22 +26,28 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # build the website; also installs your package (local::.).
+          # Installs pkgdown + your package + its deps; also installs system reqs
           extra-packages: any::pkgdown, local::.
           needs: website
 
-      # Build site into ./docs (pkgdown’s GH Pages layout)
-      - name: Build pkgdown site
+      # Build site into ./docs (pkgdown knows we're on Pages)
+      - name: Build site
         shell: Rscript {0}
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
 
       # Upload ./docs as the Pages artifact
-      - name: Upload site artifact
+      - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
-      # Publish to GitHub Pages
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
+        id: deploy
         uses: actions/deploy-pages@v4
