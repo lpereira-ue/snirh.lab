@@ -6,6 +6,6 @@
 * Removed timeout parameters from functions.
 * Fixed non-ASCII character encoding issues for CRAN compatibility.
 
-# snirh.lab 0.1.0 (2025.10.25)
+# snirh.lab 0.1.0 (2025.10.21)
 
 * Initial CRAN release.
