@@ -286,9 +286,9 @@ validate_data_integrity <- function(data) {
   }
 
   # Check for duplicates
-  dup_row <- anyDuplicated(data, by = c("station_id", "sampling_date", "parameter"))
+  dup_row <- anyDuplicated(data, by = c("station_id", "sampling_date", "parameter", "unit"))
   if (dup_row > 0) {
-    cli_abort("Duplicate records found for same station_id + sampling_date + parameter combination")
+    cli_abort("Duplicate records found for same 'station_id + sampling_date + parameter + unit' combination")
   }
 }
 
