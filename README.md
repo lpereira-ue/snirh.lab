@@ -1,7 +1,9 @@
-# snirh.lab <img src="man/figures/logo.png" align="right" height="139" alt="snirh.lab logo" />
+# snirh.lab <img src="man/figures/logo.png" alt="snirh.lab logo" align="right" height="139"/>
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab)
+
+[![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab) [![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/lpereira-ue/snirh.lab/graph/badge.svg)](https://app.codecov.io/gh/lpereira-ue/snirh.lab) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/snirh.lab)](https://cran.r-project.org/package=snirh.lab)
+
 <!-- badges: end -->
 
 ## Overview
@@ -12,24 +14,24 @@ The enhanced SNIRH lab package now includes automatic station validation against
 
 ## Key Features
 
-- ✅ **Automatic validation** against SNIRH database
-- ✅ **Station status checking** (existence and active status)
-- ✅ **Surface water and biota matrices** support
-- ✅ **Clear, informative error messages**
-- ✅ **Step-by-step progress tracking**
-- ✅ **Detailed validation reports**
+-   ✅ **Automatic validation** against SNIRH database
+-   ✅ **Station status checking** (existence and active status)
+-   ✅ **Surface water and biota matrices** support
+-   ✅ **Clear, informative error messages**
+-   ✅ **Step-by-step progress tracking**
+-   ✅ **Detailed validation reports**
 
 ## Installation
 
 ### From CRAN (when available)
 
-```r
+``` r
 install.packages("snirh.lab")
 ```
 
 ### Development version from GitHub
 
-```r
+``` r
 # Install pak if needed
 install.packages("pak")
 
@@ -39,7 +41,7 @@ pak::pak("lpereira-ue/snirh.lab")
 
 ### Dependencies
 
-```r
+``` r
 # Core requirements
 install.packages(c("data.table", "cli"))
 
@@ -54,16 +56,16 @@ install.packages("curl")
 
 ### Core Functions
 
-- `convert_to_snirh()` - Convert laboratory data to SNIRH format
-- `get_snirh_stations()` - Download station information
-- `check_station_status()` - Validate specific stations
-- `list_snirh_parameters()` - Browse available parameters
+-   `convert_to_snirh()` - Convert laboratory data to SNIRH format
+-   `get_snirh_stations()` - Download station information
+-   `check_station_status()` - Validate specific stations
+-   `list_snirh_parameters()` - Browse available parameters
 
 ## Quick Start
 
 ### Basic Conversion
 
-```r
+``` r
 library(snirh.lab)
 library(data.table)
 
@@ -85,7 +87,7 @@ print(result)
 
 ### Station Validation
 
-```r
+``` r
 # Check if your stations are valid and active
 my_stations <- c("01F/01", "25G/07", "16H/03")
 station_check <- check_station_status(my_stations, "surface.water")
@@ -98,7 +100,7 @@ filtered_data <- lab_data[station_id %in% active_stations]
 
 ### Browse Available Stations
 
-```r
+``` r
 # Get all active surface water stations
 active_stations <- get_snirh_stations("surface.water", active_only = TRUE)
 print(paste("Available stations:", nrow(active_stations)))
@@ -106,7 +108,7 @@ print(paste("Available stations:", nrow(active_stations)))
 
 ### List Parameters
 
-```r
+``` r
 # List all water quality parameters
 water_params <- list_snirh_parameters("water")
 print(head(water_params))
@@ -120,7 +122,7 @@ print(detailed_params[1:5, .(param_lab, unit_lab, param_snirh, unit_snirh, facto
 
 ### Invalid Station Example
 
-```r
+``` r
 # This will fail with clear error message
 bad_data <- data.table(
   snirh_entity = "LAB001",
@@ -136,15 +138,13 @@ bad_data <- data.table(
 try(convert_to_snirh(bad_data, "surface.water"))
 ```
 
-**Note:** If a station exists but is inactive, you'll get:
-- "Station(s) not active in SNIRH database: STATION_ID (EXTINTA)"
-- "Only stations with status 'ATIVA' can receive data"
+**Note:** If a station exists but is inactive, you'll get: - "Station(s) not active in SNIRH database: STATION_ID (EXTINTA)" - "Only stations with status 'ATIVA' can receive data"
 
 ## Working Offline
 
 ### No Internet Connection
 
-```r
+``` r
 # Will produce: "Internet connection required for station validation"
 # Solution: Check connection or use validate_stations = FALSE
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
@@ -152,7 +152,7 @@ result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 
 ### For Testing or Offline Work
 
-```r
+``` r
 # For testing or when working offline
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 
@@ -164,7 +164,7 @@ result <- convert_to_snirh(lab_data, "surface.water")
 
 ### Batch Processing with Error Handling
 
-```r
+``` r
 # Process multiple files with error handling
 process_lab_files <- function(file_paths) {
   results <- list()
@@ -203,21 +203,24 @@ process_lab_files <- function(file_paths) {
 ## Troubleshooting
 
 ### Station validation fails
-- Check internet connection
-- Verify station IDs are correct
-- Check if stations are active in SNIRH
+
+-   Check internet connection
+-   Verify station IDs are correct
+-   Check if stations are active in SNIRH
 
 ### `sf` package not available
-- Install with: `install.packages("sf")`
-- May require system dependencies on Linux
+
+-   Install with: `install.packages("sf")`
+-   May require system dependencies on Linux
 
 ### Slow downloads
-- Check network connection
-- Try during off-peak hours
+
+-   Check network connection
+-   Try during off-peak hours
 
 ## Getting Help
 
-```r
+``` r
 # View package help
 help(package = "snirh.lab")
 
@@ -232,31 +235,31 @@ list_snirh_parameters("all")
 
 ## Best Practices
 
-- ✅ Always validate stations first for production workflows
-- ✅ Cache station data for batch processing to avoid repeated downloads
-- ✅ Handle errors gracefully in automated systems
-- ✅ Keep the package updated for latest SNIRH compatibility
-- ✅ Test with small datasets before processing large files
+-   ✅ Always validate stations first for production workflows
+-   ✅ Cache station data for batch processing to avoid repeated downloads
+-   ✅ Handle errors gracefully in automated systems
+-   ✅ Keep the package updated for latest SNIRH compatibility
+-   ✅ Test with small datasets before processing large files
 
 ## Validation Coverage
 
 The package performs comprehensive validation:
 
-- ✅ Column structure and naming
-- ✅ Station existence and status
-- ✅ Duplicate detection
-- ✅ Parameter conversion availability
-- ✅ Value format validation
-- ✅ Unit conversion accuracy
-- ✅ Output format compliance
+-   ✅ Column structure and naming
+-   ✅ Station existence and status
+-   ✅ Duplicate detection
+-   ✅ Parameter conversion availability
+-   ✅ Value format validation
+-   ✅ Unit conversion accuracy
+-   ✅ Output format compliance
 
 This ensures high-quality data submission to SNIRH with minimal manual intervention.
 
 ## Links
 
-- **SNIRH Portal:** https://snirh.apambiente.pt/
-- **Report Issues:** https://github.com/lpereira-ue/snirh.lab/issues
-- **Source Code:** https://github.com/lpereira-ue/snirh.lab
+-   **SNIRH Portal:** https://snirh.apambiente.pt/
+-   **Report Issues:** https://github.com/lpereira-ue/snirh.lab/issues
+-   **Source Code:** https://github.com/lpereira-ue/snirh.lab
 
 ## License
 
@@ -266,7 +269,7 @@ This package is licensed under the MIT License.
 
 To cite snirh.lab in publications, use:
 
-```r
+``` r
 citation("snirh.lab")
 ```
 
