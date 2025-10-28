@@ -4,15 +4,10 @@ url: https://lpereira-ue.github.io/snirh.lab/
 
 navbar:
   structure:
-    left:  [reference, articles, news]
+    left:  [reference, news]
     right: [search, github]
   components:
     github:
       icon: fab fa-github
       href: https://github.com/lpereira-ue/snirh.lab
 
-articles:
-- title: Articles
-  contents:
-  - starts_with("getting-")
-  - starts_with("data-")
