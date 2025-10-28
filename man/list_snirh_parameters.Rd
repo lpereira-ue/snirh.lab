@@ -8,7 +8,7 @@ list_snirh_parameters(sample_type = "all", include_conversion_info = FALSE)
 }
 \arguments{
 \item{sample_type}{Character string specifying the sample type to filter by.
-Must be one of "water", "biota", "sediment", or "all". Default is "all".}
+Must be one of "water", "biota" or "all". Default is "all".}
 
 \item{include_conversion_info}{Logical. If TRUE, includes conversion factors
 and unit information. Default is FALSE.}

@@ -7,7 +7,7 @@
 #' can be converted to SNIRH format.
 #'
 #' @param sample_type Character string specifying the sample type to filter by.
-#'   Must be one of "water", "biota", "sediment", or "all". Default is "all".
+#'   Must be one of "water", "biota" or "all". Default is "all".
 #' @param include_conversion_info Logical. If TRUE, includes conversion factors
 #'   and unit information. Default is FALSE.
 #'
@@ -45,9 +45,8 @@
 #' @import data.table
 #' @export
 list_snirh_parameters <- function(sample_type = "all", include_conversion_info = FALSE) {
-
   # Validate inputs
-  valid_types <- c("water", "biota", "sediment", "all")
+  valid_types <- c("water", "biota", "all")
   if (!sample_type %in% valid_types) {
     cli_abort("sample_type must be one of: {.val {valid_types}}")
   }

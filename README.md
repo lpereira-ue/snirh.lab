@@ -8,9 +8,7 @@
 
 ## Overview
 
-Convert laboratory data to the Portuguese Information System for Water Resources (SNIRH) file format. The **snirh.lab** package provides tools to validate station data, convert parameters and units, and generate compliant output files for submission to SNIRH.
-
-The enhanced SNIRH lab package now includes automatic station validation against the SNIRH database for surface water and biota data. This ensures that only valid, active stations are used for data conversion.
+Convert laboratory data into the official SNIRH (Portuguese Information System for Water Resources) format https://snirh.apambiente.pt/. The **snirh.lab** package validates monitoring stations, standardizes parameters and units, and generates compliant files for submission to SNIRH.
 
 ## Key Features
 
@@ -254,12 +252,6 @@ The package performs comprehensive validation:
 -   ✅ Output format compliance
 
 This ensures high-quality data submission to SNIRH with minimal manual intervention.
-
-## Links
-
--   **SNIRH Portal:** https://snirh.apambiente.pt/
--   **Report Issues:** https://github.com/lpereira-ue/snirh.lab/issues
--   **Source Code:** https://github.com/lpereira-ue/snirh.lab
 
 ## License
 

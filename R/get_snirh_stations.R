@@ -56,11 +56,10 @@
 #' @seealso \code{\link{convert_to_snirh}} for the main conversion function
 #' @seealso \code{\link{check_station_status}} for checking specific stations
 #'
-#' @importFrom cli cli_alert_info cli_alert_success cli_abort
+#' @importFrom cli cli_abort
 #' @import data.table
 #' @export
 get_snirh_stations <- function(matrix = "surface.water", active_only = FALSE) {
-
   # Validate inputs
   if (!matrix %in% c("surface.water", "biota")) {
     cli_abort("Matrix must be 'surface.water' or 'biota'")
@@ -71,7 +70,7 @@ get_snirh_stations <- function(matrix = "surface.water", active_only = FALSE) {
     cli_abort("Internet connection required to download station data")
   }
 
-  # Download station data using the same function as convert_to_snirh
+  # Download station data
   stations <- download_snirh_stations(matrix)
 
   # Filter for active stations if requested

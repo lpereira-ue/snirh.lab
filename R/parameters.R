@@ -30,7 +30,7 @@
 #'   \item{sample_type}{Character. Type of sample matrix. Valid values are:
 #'     \itemize{
 #'       \item \code{water}: Surface water and groundwater samples
-#'       \item \code{biota}: Biological samples (fish, plants, etc.)
+#'       \item \code{biota}: Biota to assess the chemical status
 #'       \item \code{sediment}: Sediment samples from aquatic environments
 #'     }}
 #' }
@@ -58,8 +58,8 @@
 #'     and biological indicators.}
 #'   \item{Sediment parameters}{Cover grain size distribution, chemical composition,
 #'     contaminant levels, and organic matter content.}
-#'   \item{Biota parameters}{Include bioaccumulation measurements, biological
-#'     indices, and organism-specific parameters.}
+#'   \item{Biota parameters}{Include bioaccumulation measurements and 
+#'     organism-specific parameters.}
 #' }
 #'
 #' @section Data Quality:
@@ -99,14 +99,6 @@
 #'
 #' @seealso
 #' \code{\link{convert_to_snirh}} for the main conversion function that uses this data
-#'
-#' @source
-#' \itemize{
-#'   \item SNIRH database documentation: \url{https://snirh.apambiente.pt}
-#'   \item Portuguese Environment Agency (APA) technical specifications
-#'   \item Laboratory analytical method specifications
-#'   \item Water Framework Directive monitoring requirements
-#' }
 #'
 #' @references
 #' \itemize{

@@ -103,7 +103,6 @@ SNIRH_STATIONS_URL <- list(
 #' @import data.table
 #' @export
 convert_to_snirh <- function(data, matrix, validate_stations = NULL) {
-
   # Input validation
   validate_inputs(data, matrix)
 

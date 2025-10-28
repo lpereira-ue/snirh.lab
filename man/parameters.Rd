@@ -30,17 +30,9 @@ For example, if converting mg/L to µg/L, the factor would be 1000.}
 \item{sample_type}{Character. Type of sample matrix. Valid values are:
 \itemize{
 \item \code{water}: Surface water and groundwater samples
-\item \code{biota}: Biological samples (fish, plants, etc.)
+\item \code{biota}: Biota to assess the chemical status
 \item \code{sediment}: Sediment samples from aquatic environments
 }}
-}
-}
-\source{
-\itemize{
-\item SNIRH database documentation: \url{https://snirh.apambiente.pt}
-\item Portuguese Environment Agency (APA) technical specifications
-\item Laboratory analytical method specifications
-\item Water Framework Directive monitoring requirements
 }
 }
 \usage{
@@ -76,8 +68,8 @@ conductivity), chemical parameters (nutrients, metals, organic compounds),
 and biological indicators.}
 \item{Sediment parameters}{Cover grain size distribution, chemical composition,
 contaminant levels, and organic matter content.}
-\item{Biota parameters}{Include bioaccumulation measurements, biological
-indices, and organism-specific parameters.}
+\item{Biota parameters}{Include bioaccumulation measurements and
+organism-specific parameters.}
 }
 }
 

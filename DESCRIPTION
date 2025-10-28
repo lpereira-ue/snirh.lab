@@ -1,15 +1,15 @@
 Package: snirh.lab
 Type: Package
-Title: Convert Laboratory Water-Quality Data to 'SNIRH' File Format
+Title: Convert Laboratory Data to 'SNIRH' File Format
 Version: 0.1.9000
 Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
   )
-Description: Convert laboratory data to the Portuguese Information System 
-    for Water Resources 'SNIRH' file format <https://snirh.apambiente.pt/>. 
-    The package validates station data, converts parameters and units, 
-    and generates compliant output files for data submission.
+Description: Converts laboratory data to the Portuguese Information System 
+    for Water Resources ('SNIRH') file format <https://snirh.apambiente.pt/>. 
+    Validates station data, converts parameters and units, and generates 
+    compliant output files for data submission.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
