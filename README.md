@@ -8,7 +8,7 @@
 
 ## Overview
 
-Convert laboratory data into the official SNIRH (Portuguese Information System for Water Resources) format https://snirh.apambiente.pt/. The **snirh.lab** package validates monitoring stations, standardizes parameters and units, and generates compliant files for submission to SNIRH.
+Convert laboratory data into the official SNIRH (Portuguese Information System for Water Resources) format - https://snirh.apambiente.pt/. The **snirh.lab** package validates monitoring stations, standardizes parameters and units, and generates compliant files for submission to SNIRH.
 
 ## Key Features
 
