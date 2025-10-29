@@ -136,10 +136,10 @@ convert_to_snirh <- function(data, matrix, validate_stations = NULL) {
   data_with_ph_temp <- extract_ph_temperature(data_cleaned)
 
   # Clean and standardize values
-  data_with_clean_values <- clean_values(data_with_ph_temp)
+  data_with_ph_temp_cleaned <- clean_values(data_with_ph_temp)
 
   # Convert to SNIRH units
-  data_converted <- convert_units(data_with_clean_values, relevant_params)
+  data_converted <- convert_units(data_with_ph_temp_cleaned, relevant_params)
 
   # Format for SNIRH output
   data_final <- format_for_snirh(data_converted, config$network)
@@ -309,8 +309,8 @@ extract_ph_temperature <- function(data) {
   temp_ph[, c("ph", "temp_ph") := tstrsplit(value, " a ", fixed = TRUE)]
   temp_ph[, c("temp_ph", "unit") := tstrsplit(temp_ph, "\u00BA", fixed = TRUE)]
   temp_ph[, `:=`(
-    ph = as.double(trimws(ph)),
-    temp_ph = as.double(trimws(temp_ph))
+    ph = trimws(ph),
+    temp_ph = trimws(temp_ph)
   )]
 
   # Validate temperature unit
@@ -411,7 +411,7 @@ convert_units <- function(data, relevant_params) {
   if (nrow(data_not_converted) > 0) {
     failed_params <- unique(data_not_converted[,
                                                paste(parameter, paste0("[", unit, "]"))])
-    cli_abort("Parameters not found in conversion table: {.val {failed_params}}")
+    cli_abort("Parameters not found in conversion table [{length(failed_params)}]: {.val {sort(failed_params)}}")
   }
 
   # Apply conversion factors
