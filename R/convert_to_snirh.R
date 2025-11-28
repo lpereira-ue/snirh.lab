@@ -208,7 +208,7 @@ validate_snirh_stations <- function(data, matrix) {
   if (nrow(inactive_stations) > 0) {
     inactive_list <- inactive_stations[, paste0(station_id, " (", status, ")")]
     cli_abort(c(
-      "Station(s) not active in SNIRH database:",
+      "Station(s) not active in SNIRH database [{length(inactive_list)}]:",
       "x" = "{.val {inactive_list}}",
       "i" = "Only stations with status 'ATIVA' can receive data",
       "i" = "Please update station status in SNIRH database first"
