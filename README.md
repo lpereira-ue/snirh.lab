@@ -253,13 +253,9 @@ The package performs comprehensive validation:
 
 This ensures high-quality data submission to SNIRH with minimal manual intervention.
 
-## License
-
-This package is licensed under the MIT License.
-
 ## Citation
 
-To cite snirh.lab in publications, use:
+To cite snirh.lab in publications, please use:
 
 ``` r
 citation("snirh.lab")
