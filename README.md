@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 
-[![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab) [![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/lpereira-ue/snirh.lab/graph/badge.svg)](https://app.codecov.io/gh/lpereira-ue/snirh.lab) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/snirh.lab)](https://cran.r-project.org/package=snirh.lab)
+[![CRAN status](https://www.r-pkg.org/badges/version/snirh.lab)](https://CRAN.R-project.org/package=snirh.lab) [![R-CMD-check](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lpereira-ue/snirh.lab/actions/workflows/R-CMD-check.yaml) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/snirh.lab)](https://cran.r-project.org/package=snirh.lab)
 
 <!-- badges: end -->
 
@@ -21,7 +21,7 @@ Convert laboratory data into the official SNIRH (Portuguese Information System f
 
 ## Installation
 
-### From CRAN (when available)
+### From CRAN
 
 ``` r
 install.packages("snirh.lab")
