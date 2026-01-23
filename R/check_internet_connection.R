@@ -7,6 +7,5 @@ check_internet_connection <- function() {
     message("Package 'curl' is not installed. Please install it with:\n  install.packages('curl')")
     return(FALSE)
   }
-
   curl::has_internet()
 }
