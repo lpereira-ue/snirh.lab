@@ -1,7 +1,7 @@
 Package: snirh.lab
 Type: Package
 Title: Convert Laboratory Data to 'SNIRH' File Format
-Version: 0.1.0.9000
+Version: 0.2.0
 Authors@R: c(
     person("Luís", "Pereira", , "d57177@alunos.uevora.pt", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0628-4847"))
@@ -21,9 +21,9 @@ Depends:
 Imports:
     data.table (>= 1.14.0),
     cli (>= 3.0.0),
-    utils
+    utils,
+    sf (>= 1.0.0)
 Suggests:
-    sf (>= 1.0.0),
     curl (>= 4.0.0)
 URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
