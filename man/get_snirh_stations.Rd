@@ -43,7 +43,7 @@ The station database includes information about:
 Stations can have different status values:
 \describe{
 \item{ATIVA}{Station is active and can receive new data}
-\item{INATIVA}{Station is inactive (historical data only)}
+\item{DESATIVADA}{Station is inactive (historical data only)}
 \item{EXTINTA}{Station is permanently suspended and has no data}
 }
 }
