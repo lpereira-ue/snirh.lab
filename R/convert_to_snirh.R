@@ -28,8 +28,8 @@ SNIRH_STATIONS_URL <- list(
 #' @param matrix Character string specifying the type of matrix being processed.
 #'   Must be one of: "surface.water" or "biota".
 #' @param validate_stations Logical. Whether to validate station IDs against
-#'   the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
-#'   Requires internet connection.
+#'   the SNIRH database. Defaults to TRUE. Set to FALSE for offline use, testing,
+#'   or matrices that don't support validation.
 #'
 #' @return A data.table formatted for SNIRH import with the following structure:
 #'   - First row contains network specification (REDE=NETWORK_NAME)
@@ -102,17 +102,24 @@ SNIRH_STATIONS_URL <- list(
 #' @importFrom utils download.file unzip
 #' @import data.table
 #' @export
-convert_to_snirh <- function(data, matrix, validate_stations = NULL) {
+convert_to_snirh <- function(data, matrix, validate_stations = TRUE) {
+  # Validate inputs
+  if (!is.data.frame(data)) {
+    cli::cli_abort("{.arg data} must be a data.frame or data.table, not {.cls {class(data)}}.")
+  }
+  data <- as.data.table(data)
+
+  matrix <- match.arg(matrix, choices = c("surface.water", "biota"))
+
+  if (!is.logical(validate_stations) || length(validate_stations) != 1L || is.na(validate_stations)) {
+    cli_abort("{.arg validate_stations} must be a single TRUE/FALSE value.")
+  }
+  
   # Input validation
   validate_inputs(data, matrix)
 
   # Get network configuration
   config <- NETWORK_CONFIG[[matrix]]
-
-  # Set default station validation based on matrix type
-  if (is.null(validate_stations)) {
-    validate_stations <- config$validate_stations
-  }
 
   # Filter parameters for the specified sample type
   relevant_params <- parameters[sample_type == config$sample_type]
@@ -245,7 +252,12 @@ clean_empty_data <- function(data) {
   initial_cols <- ncol(data)
 
   # Remove completely empty rows
-  data_cleaned <- data[rowSums(is.na(data), na.rm = TRUE) != ncol(data)]
+  # Check each column: is it NA or (if character) empty string?
+  empty_mask <- data[, lapply(.SD, function(x) {
+    is.na(x) | (is.character(x) & trimws(x) == "")
+  })]
+  all_empty <- empty_mask[, Reduce(`&`, .SD)]
+  data_cleaned <- data[!all_empty]
 
   # Remove completely empty columns
   data_cleaned <- data_cleaned[, colSums(is.na(data_cleaned), na.rm = TRUE) != nrow(data_cleaned), with = FALSE]
@@ -470,7 +482,7 @@ apply_snirh_template <- function(data_wide, network) {
 
   # Add station markers
   dt_out[, station := fifelse(
-    !shift(station_id) == station_id | is.na(shift(station_id)),
+    (shift(station_id) != station_id) | is.na(shift(station_id)),
     paste0("ESTACAO=", station_id),
     NA_character_
   )]
