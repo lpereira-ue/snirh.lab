@@ -25,6 +25,6 @@ Imports:
 Suggests:
     sf (>= 1.0.0),
     curl (>= 4.0.0)
-URL: URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
+URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
 Config/testthat/edition: 3
