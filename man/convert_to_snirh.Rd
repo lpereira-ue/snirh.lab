@@ -96,6 +96,8 @@ lab_data <- data.table::data.table(
 snirh_data <- convert_to_snirh(lab_data, "surface.water")
 
 # Skip station validation if needed (not recommended)
-snirh_data <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
+snirh_data <- convert_to_snirh(lab_data, "surface.water",
+                               validate_stations = FALSE)
 }
+
 }
