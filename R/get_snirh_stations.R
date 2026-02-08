@@ -12,14 +12,15 @@
 #' @return A data.table with station information containing:
 #'   \describe{
 #'     \item{station_id}{Station identifier (corresponds to "Código" in SNIRH)}
-#'     \item{status}{Station status (e.g., "ATIVA", "EXTINTA")}
-#'     \item{geometry}{Spatial geometry (if sf package is available)}
+#'     \item{status}{Station status (e.g., "ATIVA", "DESATIVADA", "EXTINTA")}
 #'   }
 #'
 #' @details
-#' Downloads the latest station information from the SNIRH
-#' geoportal. It requires an internet connection and the 'sf' package for
-#' processing shapefiles.
+#' Downloads the latest station information from the SNIAmb WFS service.
+#' It requires an internet connection.
+#'
+#' The download/parsing step uses the 'sf' package internally; if 'sf' is not
+#' installed, the function will abort with a clear message.
 #'
 #' The station database includes information about:
 #' \itemize{
