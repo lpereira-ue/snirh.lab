@@ -8,6 +8,18 @@ navbar:
     right: [search, github]
   components:
     github:
-      icon: fab fa-github
+      icon: fab fa-github fa-lg
       href: https://github.com/lpereira-ue/snirh.lab
 
+reference:
+  - title: "Core Conversion"
+    contents:
+      - convert_to_snirh
+  - title: "Station Validation"
+    contents:
+      - get_snirh_stations
+      - check_station_status
+  - title: "Parameter Information"
+    contents:
+      - list_snirh_parameters
+      - parameters
