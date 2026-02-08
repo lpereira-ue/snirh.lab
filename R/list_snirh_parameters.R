@@ -1,5 +1,3 @@
-
-
 #' List available SNIRH parameters
 #'
 #' Returns a summary of available parameters in the conversion table,
@@ -60,7 +58,8 @@ list_snirh_parameters <- function(sample_type = "all", include_conversion_info =
 
   # Filter by sample type if not "all"
   if (sample_type != "all") {
-    param_data <- param_data[sample_type == sample_type]
+    stype <- sample_type
+    param_data <- param_data[sample_type == stype]
   }
 
   # Select columns based on detail level
