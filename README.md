@@ -136,7 +136,7 @@ bad_data <- data.table(
 try(convert_to_snirh(bad_data, "surface.water"))
 ```
 
-**Note:** If a station exists but is inactive, you'll get: - "Station(s) not active in SNIRH database: STATION_ID (EXTINTA)" - "Only stations with status 'ATIVA' can receive data"
+**Note:** If a station exists but is inactive, you'll get: - "Station(s) not active in SNIRH database: STATION_ID (STATUS)" - "Only stations with status 'ATIVA' can receive data"
 
 ## Working Offline
 
@@ -146,56 +146,6 @@ try(convert_to_snirh(bad_data, "surface.water"))
 # Will produce: "Internet connection required for station validation"
 # Solution: Check connection or use validate_stations = FALSE
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
-```
-
-### For Testing or Offline Work
-
-``` r
-# For testing or when working offline
-result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
-
-# For slow connections
-result <- convert_to_snirh(lab_data, "surface.water")
-```
-
-## Advanced Usage
-
-### Batch Processing with Error Handling
-
-``` r
-# Process multiple files with error handling
-process_lab_files <- function(file_paths) {
-  results <- list()
-  
-  for (file_path in file_paths) {
-    tryCatch({
-      # Read your data
-      lab_data <- read_your_data_function(file_path)
-      
-      # Check stations first
-      unique_stations <- unique(lab_data$station_id)
-      station_status <- check_station_status(unique_stations, "surface.water")
-      
-      # Filter to active stations only
-      active_stations <- station_status[active == TRUE, station_id]
-      filtered_data <- lab_data[station_id %in% active_stations]
-      
-      if (nrow(filtered_data) > 0) {
-        # Convert filtered data
-        result <- convert_to_snirh(filtered_data, "surface.water")
-        results[[file_path]] <- result
-        cat("✅ Successfully processed:", file_path, "\n")
-      } else {
-        cat("⚠️ No active stations in:", file_path, "\n")
-      }
-      
-    }, error = function(e) {
-      cat("❌ Error processing:", file_path, "-", e$message, "\n")
-    })
-  }
-  
-  return(results)
-}
 ```
 
 ## Troubleshooting
@@ -210,11 +160,6 @@ process_lab_files <- function(file_paths) {
 
 -   Install with: `install.packages("sf")`
 -   May require system dependencies on Linux
-
-### Slow downloads
-
--   Check network connection
--   Try during off-peak hours
 
 ## Getting Help
 
@@ -260,7 +205,3 @@ To cite snirh.lab in publications, please use:
 ``` r
 citation("snirh.lab")
 ```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
