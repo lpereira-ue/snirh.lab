@@ -10,3 +10,5 @@
 docs
 data-raw/
 build_package.R
+
+**/*.quarto_ipynb
