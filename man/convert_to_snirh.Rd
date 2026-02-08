@@ -4,7 +4,7 @@
 \alias{convert_to_snirh}
 \title{Convert data to SNIRH file format}
 \usage{
-convert_to_snirh(data, matrix, validate_stations = NULL)
+convert_to_snirh(data, matrix, validate_stations = TRUE)
 }
 \arguments{
 \item{data}{A data.frame or data.table containing the original laboratory data.
@@ -15,8 +15,8 @@ station_id, sampling_date, parameter, unit, value.}
 Must be one of: "surface.water" or "biota".}
 
 \item{validate_stations}{Logical. Whether to validate station IDs against
-the SNIRH database. Defaults to TRUE for surface.water and biota matrices.
-Requires internet connection.}
+the SNIRH database. Defaults to TRUE. Set to FALSE for offline use, testing,
+or matrices that don't support validation.}
 }
 \value{
 A data.table formatted for SNIRH import with the following structure:
@@ -96,8 +96,6 @@ lab_data <- data.table::data.table(
 snirh_data <- convert_to_snirh(lab_data, "surface.water")
 
 # Skip station validation if needed (not recommended)
-snirh_data <- convert_to_snirh(lab_data, "surface.water",
-                               validate_stations = FALSE)
+snirh_data <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 }
-
 }
