@@ -148,19 +148,6 @@ try(convert_to_snirh(bad_data, "surface.water"))
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 ```
 
-## Troubleshooting
-
-### Station validation fails
-
--   Check internet connection
--   Verify station IDs are correct
--   Check if stations are active in SNIRH
-
-### `sf` package not available
-
--   Install with: `install.packages("sf")`
--   May require system dependencies on Linux
-
 ## Getting Help
 
 ``` r
@@ -179,7 +166,6 @@ list_snirh_parameters("all")
 ## Best Practices
 
 -   ✅ Always validate stations first for production workflows
--   ✅ Cache station data for batch processing to avoid repeated downloads
 -   ✅ Handle errors gracefully in automated systems
 -   ✅ Keep the package updated for latest SNIRH compatibility
 -   ✅ Test with small datasets before processing large files
