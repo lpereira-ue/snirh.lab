@@ -1,4 +1,4 @@
-# snirh.lab 0.2.0
+# snirh.lab 0.1.0.9000
 
 ### Changes
 * `convert_to_snirh()` now requires `validate_stations` to be a single TRUE/FALSE value (default: `TRUE`; previously `NULL` in the signature).
