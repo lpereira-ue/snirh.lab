@@ -14,7 +14,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Language: en-US
 Depends: 
     R (>= 4.0.0)
@@ -28,3 +27,4 @@ Suggests:
 URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
