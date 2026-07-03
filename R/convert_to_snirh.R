@@ -1,6 +1,6 @@
 # Constants
 VALID_MATRICES <- c("surface.water", "biota")
-REQUIRED_COLUMNS <- c("snirh_entity", "station_name", "station_id", "sampling_date",
+REQUIRED_COLUMNS <- c("snirh_entity", "station_id", "sampling_date",
                       "parameter", "unit", "value")
 
 # Network configuration
@@ -23,8 +23,10 @@ SNIRH_STATIONS_URL <- list(
 #' to SNIRH standards.
 #'
 #' @param data A data.frame or data.table containing the original laboratory data.
-#'   Must contain the following columns in order: snirh_entity, station_name,
-#'   station_id, sampling_date, parameter, unit, value.
+#'   Must contain exactly these columns, in order: snirh_entity, station_id,
+#'   sampling_date, parameter, unit, value, with no missing values. The
+#'   station_id <-> station_name matching is expected to be done upstream,
+#'   before data is submitted to conversion.
 #' @param matrix Character string specifying the type of matrix being processed.
 #'   Must be one of: "surface.water" or "biota".
 #' @param validate_stations Logical. Whether to validate station IDs against
@@ -40,7 +42,7 @@ SNIRH_STATIONS_URL <- list(
 #' @details
 #' The function performs several key operations:
 #' \itemize{
-#'   \item Validates input data structure and removes empty rows/columns
+#'   \item Validates input data structure and removes empty rows
 #'   \item Validates station IDs against SNIRH database (for surface.water and biota)
 #'   \item Checks for duplicate measurements (same station, date, and parameter)
 #'   \item Extracts pH temperature measurements when present
@@ -61,10 +63,10 @@ SNIRH_STATIONS_URL <- list(
 #' invalid stations that need to be corrected in the database.
 #'
 #' @section Input Data Requirements:
-#' The input data must be a data.frame/data.table with exactly these columns:
+#' The input data must be a data.frame/data.table with exactly these columns,
+#' in order, and with no missing values:
 #' \describe{
 #'   \item{snirh_entity}{Entity responsible for the data}
-#'   \item{station_name}{Human-readable station name}
 #'   \item{station_id}{Unique station identifier (must match SNIRH database)}
 #'   \item{sampling_date}{Date and time of sampling (POSIXct recommended)}
 #'   \item{parameter}{Parameter name as used in laboratory}
@@ -82,7 +84,6 @@ SNIRH_STATIONS_URL <- list(
 #' \donttest{
 #' lab_data <- data.table::data.table(
 #'   snirh_entity = "APA",
-#'   station_name = "River station 1",
 #'   station_id = "01F/01",  # Must be valid SNIRH station ID
 #'   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
 #'   parameter = "pH - Campo",
@@ -133,7 +134,7 @@ convert_to_snirh <- function(data, matrix, validate_stations = TRUE) {
     validate_snirh_stations(data, matrix)
   }
 
-  # Clean data (remove empty rows/columns)
+  # Clean data (remove empty rows)
   data_cleaned <- clean_empty_data(data)
 
   # Validate data integrity
@@ -232,7 +233,7 @@ validate_snirh_stations <- function(data, matrix) {
 #' @noRd
 #' @keywords internal
 validate_data_structure <- function(data) {
-  if (!all(REQUIRED_COLUMNS == names(data))) {
+  if (!identical(names(data), REQUIRED_COLUMNS)) {
     cli_abort(c(
       "Column names or order do not meet requirements",
       "i" = "Expected columns: {.val {REQUIRED_COLUMNS}}",
@@ -242,15 +243,12 @@ validate_data_structure <- function(data) {
 }
 
 
-#' Clean empty rows and columns from data
+#' Clean empty rows from data
 #' @param data Input data.table
 #' @return Cleaned data.table
 #' @noRd
 #' @keywords internal
 clean_empty_data <- function(data) {
-  initial_rows <- nrow(data)
-  initial_cols <- ncol(data)
-
   # Remove completely empty rows
   # Check each column: is it NA or (if character) empty string?
   empty_mask <- data[, lapply(.SD, function(x) {
@@ -258,9 +256,6 @@ clean_empty_data <- function(data) {
   })]
   all_empty <- empty_mask[, Reduce(`&`, .SD)]
   data_cleaned <- data[!all_empty]
-
-  # Remove completely empty columns
-  data_cleaned <- data_cleaned[, colSums(is.na(data_cleaned), na.rm = TRUE) != nrow(data_cleaned), with = FALSE]
 
   # Clean whitespace from key columns
   data_cleaned[, station_id := trimws(station_id, whitespace = "[ \\h\\v\t\n\r]")]
@@ -275,24 +270,20 @@ clean_empty_data <- function(data) {
 #' @noRd
 #' @keywords internal
 validate_data_integrity <- function(data) {
-  # Check for null values in critical columns
+  # Check for missing values (NA or blank) in required columns
   # Exclude IGA parameter which has no unit
   data_for_null_check <- data[parameter != "\u00CDNDICE DE GRUPO DE ALGAS (IGA)"]
 
   null_counts <- data_for_null_check[,
-                                     lapply(.SD, function(x) sum(is.na(x))),
+                                     lapply(.SD, function(x) sum(is.na(x) | trimws(as.character(x)) == "")),
                                      .SDcols = REQUIRED_COLUMNS
   ]
   total_nulls <- sum(unlist(null_counts))
-
-  # cols_nulls <- names(null_counts)[
-  #   null_counts[, sapply(.SD, function(x) x > 0)]
-  # ]
   cols_nulls <- names(null_counts)[unlist(null_counts) > 0]
 
   if (total_nulls > 0) {
     cli_abort(c(
-      "Required columns contain null values: {.field {cols_nulls}}"
+      "Required columns contain missing values: {.field {cols_nulls}}"
     ))
   }
 

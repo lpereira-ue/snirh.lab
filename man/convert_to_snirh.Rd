@@ -8,8 +8,10 @@ convert_to_snirh(data, matrix, validate_stations = TRUE)
 }
 \arguments{
 \item{data}{A data.frame or data.table containing the original laboratory data.
-Must contain the following columns in order: snirh_entity, station_name,
-station_id, sampling_date, parameter, unit, value.}
+Must contain exactly these columns, in order: snirh_entity, station_id,
+sampling_date, parameter, unit, value, with no missing values. The
+station_id <-> station_name matching is expected to be done upstream,
+before data is submitted to conversion.}
 
 \item{matrix}{Character string specifying the type of matrix being processed.
 Must be one of: "surface.water" or "biota".}
@@ -36,7 +38,7 @@ to SNIRH standards.
 \details{
 The function performs several key operations:
 \itemize{
-\item Validates input data structure and removes empty rows/columns
+\item Validates input data structure and removes empty rows
 \item Validates station IDs against SNIRH database (for surface.water and biota)
 \item Checks for duplicate measurements (same station, date, and parameter)
 \item Extracts pH temperature measurements when present
@@ -60,10 +62,10 @@ invalid stations that need to be corrected in the database.
 
 \section{Input Data Requirements}{
 
-The input data must be a data.frame/data.table with exactly these columns:
+The input data must be a data.frame/data.table with exactly these columns,
+in order, and with no missing values:
 \describe{
 \item{snirh_entity}{Entity responsible for the data}
-\item{station_name}{Human-readable station name}
 \item{station_id}{Unique station identifier (must match SNIRH database)}
 \item{sampling_date}{Date and time of sampling (POSIXct recommended)}
 \item{parameter}{Parameter name as used in laboratory}
@@ -84,7 +86,6 @@ conversion factors and SNIRH symbols for all parameters in the input data.
 \donttest{
 lab_data <- data.table::data.table(
   snirh_entity = "APA",
-  station_name = "River station 1",
   station_id = "01F/01",  # Must be valid SNIRH station ID
   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
   parameter = "pH - Campo",
