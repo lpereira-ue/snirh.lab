@@ -5,10 +5,14 @@ export(convert_to_snirh)
 export(get_snirh_stations)
 export(list_snirh_parameters)
 import(data.table)
-importFrom(cli,cli_abort)
-importFrom(cli,cli_alert_info)
-importFrom(cli,cli_alert_success)
-importFrom(cli,cli_alert_warning)
-importFrom(utils,download.file)
-importFrom(utils,packageVersion)
-importFrom(utils,unzip)
+importFrom(cli,
+  cli_abort,
+  cli_alert_info,
+  cli_alert_success,
+  cli_alert_warning
+)
+importFrom(utils,
+  download.file,
+  packageVersion,
+  unzip
+)

@@ -27,4 +27,4 @@ Suggests:
 URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
 Config/testthat/edition: 3
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0
