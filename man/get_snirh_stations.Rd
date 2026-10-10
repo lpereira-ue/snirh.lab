@@ -62,6 +62,7 @@ Stations can have different status values:
 }
 
 \examples{
+\dontshow{if (snirh.lab:::snirh_reachable()) withAutoprint(\{ # examplesIf}
 \donttest{
 # Get all surface water stations
 all_stations <- get_snirh_stations("surface.water")
@@ -77,7 +78,7 @@ station_info <- get_snirh_stations("surface.water")
 station_status <- station_info[station_id \%in\% my_stations]
 print(station_status)
 }
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{convert_to_snirh}} for the main conversion function

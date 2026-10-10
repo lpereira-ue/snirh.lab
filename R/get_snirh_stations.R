@@ -44,7 +44,7 @@
 #'   \item{EXTINTA}{Station is permanently suspended and has no data}
 #' }
 #'
-#' @examples
+#' @examplesIf snirh.lab:::snirh_reachable()
 #' \donttest{
 #' # Get all surface water stations
 #' all_stations <- get_snirh_stations("surface.water")

@@ -26,7 +26,7 @@
 #'   \item Getting an overview of station status for reporting
 #' }
 #'
-#' @examples
+#' @examplesIf snirh.lab:::snirh_reachable()
 #' \donttest{
 #' # Check status of specific stations
 #' my_stations <- c("07G/50", "25G/07", "INVALID_ID")

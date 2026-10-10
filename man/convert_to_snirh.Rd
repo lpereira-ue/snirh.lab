@@ -91,6 +91,7 @@ combinations in the input data must exist in the table.
 }
 
 \examples{
+\dontshow{if (snirh.lab:::snirh_reachable()) withAutoprint(\{ # examplesIf}
 # Example data structure
 \donttest{
 lab_data <- data.table::data.table(
@@ -109,5 +110,5 @@ snirh_data <- convert_to_snirh(lab_data, "surface.water")
 snirh_data <- convert_to_snirh(lab_data, "surface.water",
                                validate_stations = FALSE)
 }
-
+\dontshow{\}) # examplesIf}
 }

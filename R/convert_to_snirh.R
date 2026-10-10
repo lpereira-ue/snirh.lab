@@ -71,7 +71,7 @@
 #' automatically; see [update_snirh_parameters()]. All parameter/unit
 #' combinations in the input data must exist in the table.
 #'
-#' @examples
+#' @examplesIf snirh.lab:::snirh_reachable()
 #' # Example data structure
 #' \donttest{
 #' lab_data <- data.table::data.table(

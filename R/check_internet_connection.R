@@ -31,3 +31,23 @@ check_flag <- function(x, arg = deparse(substitute(x))) {
   }
   invisible(x)
 }
+
+
+#' Check that the SNIRH website is reachable
+#'
+#' Used to run the examples that download data from SNIRH only when the
+#' website can be reached (it may be unreachable from some networks).
+#'
+#' @return Logical
+#' @noRd
+snirh_reachable <- function(check_url = "https://snirh.apambiente.pt", timeout = 10) {
+  old_timeout <- getOption("timeout")
+  on.exit(options(timeout = old_timeout), add = TRUE)
+  options(timeout = timeout)
+
+  tryCatch({
+    con <- url(check_url, open = "rb")
+    close(con)
+    TRUE
+  }, error = function(e) FALSE, warning = function(w) FALSE)
+}

@@ -36,6 +36,7 @@ This function is particularly useful for:
 }
 }
 \examples{
+\dontshow{if (snirh.lab:::snirh_reachable()) withAutoprint(\{ # examplesIf}
 \donttest{
 # Check status of specific stations
 my_stations <- c("07G/50", "25G/07", "INVALID_ID")
@@ -52,7 +53,7 @@ if (nrow(inactive) > 0) {
 # Check only active stations
 active_stations <- status_check[active == TRUE]
 }
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link{get_snirh_stations}} for getting all station information
