@@ -4,15 +4,14 @@ export(check_station_status)
 export(convert_to_snirh)
 export(get_snirh_stations)
 export(list_snirh_parameters)
+export(update_snirh_parameters)
 import(data.table)
 importFrom(cli,
   cli_abort,
-  cli_alert_info,
   cli_alert_success,
   cli_alert_warning
 )
 importFrom(utils,
   download.file,
-  packageVersion,
-  unzip
+  packageVersion
 )

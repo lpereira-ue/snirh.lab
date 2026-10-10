@@ -18,7 +18,8 @@ A data.table with the following columns:
 \item{station_id}{The station ID that was checked}
 \item{found}{Logical indicating if station exists in SNIRH}
 \item{status}{Station status if found, NA if not found}
-\item{active}{Logical indicating if station is active (status = "ATIVA")}
+\item{active}{Logical indicating if station is active (status = "ATIVA"),
+NA if not found}
 }
 }
 \description{

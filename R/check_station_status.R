@@ -14,7 +14,8 @@
 #'     \item{station_id}{The station ID that was checked}
 #'     \item{found}{Logical indicating if station exists in SNIRH}
 #'     \item{status}{Station status if found, NA if not found}
-#'     \item{active}{Logical indicating if station is active (status = "ATIVA")}
+#'     \item{active}{Logical indicating if station is active (status = "ATIVA"),
+#'       NA if not found}
 #'   }
 #'
 #' @details
@@ -46,7 +47,7 @@
 #' @seealso \code{\link{get_snirh_stations}} for getting all station information
 #' @seealso \code{\link{convert_to_snirh}} for the main conversion function
 #'
-#' @importFrom cli cli_alert_info cli_alert_success cli_alert_warning
+#' @importFrom cli cli_abort cli_alert_warning
 #' @import data.table
 #' @export
 check_station_status <- function(station_ids, matrix = "surface.water") {
@@ -56,45 +57,39 @@ check_station_status <- function(station_ids, matrix = "surface.water") {
     cli_abort("No station IDs provided")
   }
 
-  # Remove NAs and duplicates
-  station_ids <- unique(station_ids[!is.na(station_ids)])
+  # Remove NAs, surrounding whitespace and duplicates
+  station_ids <- trimws(as.character(station_ids))
+  station_ids <- unique(station_ids[!is.na(station_ids) & station_ids != ""])
 
   # Get all SNIRH stations
   snirh_stations <- get_snirh_stations(matrix, active_only = FALSE)
 
-  # Create result data.table
+  # Match station IDs against SNIRH
+  idx <- match(station_ids, snirh_stations$station_id)
+  found <- !is.na(idx)
+  status <- snirh_stations$status[idx]
+
   result <- data.table(
     station_id = station_ids,
-    found = station_ids %in% snirh_stations$station_id,
-    status = NA_character_,
-    active = NA
+    found = found,
+    status = status,
+    active = fifelse(found, status %in% "ATIVA", NA)
   )
 
-  # Fill in status information for found stations
-  for (i in seq_len(nrow(result))) {
-    if (result$found[i]) {
-      station_info <- snirh_stations[station_id == result$station_id[i]]
-      result$status[i] <- station_info$status[1]
-      result$active[i] <- station_info$status[1] == "ATIVA"
-    }
-  }
-
   # Report results
-  found_count <- sum(result$found)
-  active_count <- sum(result$active, na.rm = TRUE)
-  missing_count <- sum(!result$found)
-
-  if (missing_count > 0) {
+  if (any(!found)) {
     missing_ids <- result[found == FALSE, station_id]
     cli_alert_warning("Missing from SNIRH: {.val {missing_ids}}")
   }
 
-  inactive_count <- found_count - active_count
-  if (inactive_count > 0) {
+  if (any(found & !result$active, na.rm = TRUE)) {
     inactive_ids <- result[found == TRUE & active == FALSE,
-                           paste0(station_id, " (", status, ")")]
+                           paste0(station_id, " (", fifelse(is.na(status), "no status", status), ")")]
     cli_alert_warning("Inactive stations: {.val {inactive_ids}}")
   }
+
+  # Drop the indices created by the subsets above
+  setindex(result, NULL)
 
   return(result)
 }

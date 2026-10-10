@@ -8,7 +8,7 @@ list_snirh_parameters(sample_type = "all", include_conversion_info = FALSE)
 }
 \arguments{
 \item{sample_type}{Character string specifying the sample type to filter by.
-Must be one of "water", "biota" or "all". Default is "all".}
+Must be one of "water", "biota", "sediment" or "all". Default is "all".}
 
 \item{include_conversion_info}{Logical. If TRUE, includes conversion factors
 and unit information. Default is FALSE.}
@@ -23,6 +23,11 @@ organized by sample type. This helps users understand what parameters
 can be converted to SNIRH format.
 }
 \details{
+The parameter conversion table is maintained outside the package code and
+is downloaded automatically the first time it is needed in an R session
+(see \code{\link[=update_snirh_parameters]{update_snirh_parameters()}} for details, the table format and how to
+use a custom table).
+
 This function provides an overview of the parameter conversion capabilities
 of the package. It can help users:
 \itemize{
@@ -50,5 +55,5 @@ print(paste("Available sample types:", paste(unique_types, collapse = ", ")))
 
 }
 \seealso{
-\code{\link{parameters}} for the complete parameter dataset
+\code{\link[=update_snirh_parameters]{update_snirh_parameters()}} for updating the parameter table
 }

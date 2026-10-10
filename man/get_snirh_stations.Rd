@@ -4,40 +4,52 @@
 \alias{get_snirh_stations}
 \title{Get SNIRH station information}
 \usage{
-get_snirh_stations(matrix = "surface.water", active_only = FALSE)
+get_snirh_stations(
+  matrix = "surface.water",
+  active_only = FALSE,
+  refresh = FALSE
+)
 }
 \arguments{
 \item{matrix}{Character string specifying the matrix type. Currently supports
-"surface.water" and "biota" (both use the same station database).}
+"surface.water" and "biota" (both use the same station list).}
 
-\item{active_only}{Logical. If TRUE, returns only active stations (Estado = "ATIVA").
-If FALSE, returns all stations. Default is FALSE.}
+\item{active_only}{Logical. If TRUE, returns only active stations
+(status = "ATIVA"). If FALSE, returns all stations. Default is FALSE.}
+
+\item{refresh}{Logical. If TRUE, downloads the station list again even if it
+was already downloaded in the current R session. Default is FALSE.}
 }
 \value{
-A data.table with station information containing:
+A data.table with one row per station and the columns:
 \describe{
-\item{station_id}{Station identifier (corresponds to "Código" in SNIRH)}
+\item{station_id}{Station identifier ("Código" in SNIRH)}
+\item{station_name}{Station name}
+\item{basin}{River basin}
+\item{altitude_m}{Altitude (m)}
+\item{latitude, longitude}{Coordinates (decimal degrees, WGS84)}
+\item{entity}{Entity responsible for the station}
+\item{district, municipality, parish}{Administrative location}
+\item{river}{River name}
+\item{drainage_area_km2}{Drainage area (km2)}
+\item{distance_to_mouth_km}{Distance to the river mouth (km)}
+\item{start_date}{Date the station started operating}
+\item{end_date}{Date the station was closed}
+\item{purpose}{Monitoring purpose}
 \item{status}{Station status (e.g., "ATIVA", "DESATIVADA", "EXTINTA")}
 }
 }
 \description{
-Downloads and returns information about SNIRH monitoring stations for
-surface water quality. This function can be used to check station status,
-get available station IDs, or validate stations before data conversion.
+Downloads and returns information about SNIRH water quality monitoring
+stations. This function can be used to check station status, get available
+station IDs, or validate stations before data conversion.
 }
 \details{
-Downloads the latest station information from the SNIAmb WFS service.
-It requires an internet connection.
-
-The download/parsing step uses the 'sf' package internally; if 'sf' is not
-installed, the function will abort with a clear message.
-
-The station database includes information about:
-\itemize{
-\item Station location (coordinates)
-\item Station status (active/inactive)
-\item Station metadata
-}
+Downloads the latest station list (CSV) from the SNIRH website
+(\url{https://snirh.apambiente.pt}). It requires an internet connection. The
+list is cached for the rest of the R session, so subsequent calls (including
+those made by \code{\link[=convert_to_snirh]{convert_to_snirh()}} and \code{\link[=check_station_status]{check_station_status()}}) are fast.
+Use \code{refresh = TRUE} to force a new download.
 }
 \section{Station Status}{
 

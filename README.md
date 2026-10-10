@@ -15,6 +15,7 @@ Convert laboratory data into the official SNIRH (Portuguese Information System f
 -   ✅ **Automatic validation** against SNIRH database
 -   ✅ **Station status checking** (existence and active status)
 -   ✅ **Surface water and biota matrices** support
+-   ✅ **Parameter table updated independently** of package releases
 -   ✅ **Clear, informative error messages**
 -   ✅ **Step-by-step progress tracking**
 -   ✅ **Detailed validation reports**
@@ -43,9 +44,6 @@ pak::pak("lpereira-ue/snirh.lab")
 # Core requirements
 install.packages(c("data.table", "cli"))
 
-# For station validation
-install.packages("sf")
-
 # For better internet connectivity checks (optional)
 install.packages("curl")
 ```
@@ -58,6 +56,7 @@ install.packages("curl")
 -   `get_snirh_stations()` - Download station information
 -   `check_station_status()` - Validate specific stations
 -   `list_snirh_parameters()` - Browse available parameters
+-   `update_snirh_parameters()` - Update the parameter conversion table
 
 ## Quick Start
 
@@ -70,7 +69,6 @@ library(data.table)
 # Prepare your data
 lab_data <- data.table(
   snirh_entity = "LAB001",
-  station_name = "Rio Douro - Crestuma",
   station_id = "01F/01", # Must be valid SNIRH station
   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
   parameter = "pH - Campo",
@@ -124,7 +122,6 @@ print(detailed_params[1:5, .(param_lab, unit_lab, param_snirh, unit_snirh, facto
 # This will fail with clear error message
 bad_data <- data.table(
   snirh_entity = "LAB001",
-  station_name = "Invalid Station",
   station_id = "INVALID_ID",
   sampling_date = as.POSIXct("2024-01-15 10:30:00"),
   parameter = "pH - Campo",
@@ -136,7 +133,24 @@ bad_data <- data.table(
 try(convert_to_snirh(bad_data, "surface.water"))
 ```
 
-**Note:** If a station exists but is inactive, you'll get: - "Station(s) not active in SNIRH database: STATION_ID (STATUS)" - "Only stations with status 'ATIVA' can receive data"
+**Note:** If a station exists but is inactive, you'll get:
+
+-   "Station(s) not active in SNIRH database: STATION_ID (STATUS)"
+-   "Only stations with status 'ATIVA' can receive data"
+
+## Parameter Conversion Table
+
+The table that maps laboratory parameters and units to SNIRH symbols and conversion factors is maintained outside the package code, in [`inst/extdata/parameters.csv`](https://github.com/lpereira-ue/snirh.lab/blob/main/inst/extdata/parameters.csv). The latest version is downloaded automatically the first time it is needed in each R session, so new parameters become available without installing a new version of the package. If the download fails, the last downloaded copy (or the version bundled with the package) is used.
+
+``` r
+# Force an update of the parameter table
+update_snirh_parameters()
+
+# Use your own parameter table (local file or URL)
+options(snirh.lab.parameters = "path/to/my_parameters.csv")
+```
+
+See `?update_snirh_parameters` for the table format.
 
 ## Working Offline
 
@@ -148,6 +162,8 @@ try(convert_to_snirh(bad_data, "surface.water"))
 result <- convert_to_snirh(lab_data, "surface.water", validate_stations = FALSE)
 ```
 
+Without internet, the last downloaded parameter table (or the one bundled with the package) is used.
+
 ## Getting Help
 
 ``` r
@@ -158,6 +174,7 @@ help(package = "snirh.lab")
 ?convert_to_snirh
 ?get_snirh_stations
 ?check_station_status
+?update_snirh_parameters
 
 # List all available parameters
 list_snirh_parameters("all")

@@ -12,7 +12,6 @@ Description: Converts laboratory data to the Portuguese Information System
     compliant output files for data submission.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 Language: en-US
 Depends: 
@@ -20,10 +19,11 @@ Depends:
 Imports:
     data.table (>= 1.14.0),
     cli (>= 3.0.0),
-    utils,
-    sf (>= 1.0.0)
+    tools,
+    utils
 Suggests:
-    curl (>= 4.0.0)
+    curl (>= 4.0.0),
+    testthat (>= 3.0.0)
 URL: https://lpereira-ue.github.io/snirh.lab/, https://github.com/lpereira-ue/snirh.lab
 BugReports: https://github.com/lpereira-ue/snirh.lab/issues
 Config/testthat/edition: 3

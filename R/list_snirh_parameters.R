@@ -5,7 +5,7 @@
 #' can be converted to SNIRH format.
 #'
 #' @param sample_type Character string specifying the sample type to filter by.
-#'   Must be one of "water", "biota" or "all". Default is "all".
+#'   Must be one of "water", "biota", "sediment" or "all". Default is "all".
 #' @param include_conversion_info Logical. If TRUE, includes conversion factors
 #'   and unit information. Default is FALSE.
 #'
@@ -13,6 +13,11 @@
 #'   include_conversion_info parameter.
 #'
 #' @details
+#' The parameter conversion table is maintained outside the package code and
+#' is downloaded automatically the first time it is needed in an R session
+#' (see [update_snirh_parameters()] for details, the table format and how to
+#' use a custom table).
+#'
 #' This function provides an overview of the parameter conversion capabilities
 #' of the package. It can help users:
 #' \itemize{
@@ -38,23 +43,19 @@
 #' print(paste("Available sample types:", paste(unique_types, collapse = ", ")))
 #' }
 #'
-#' @seealso \code{\link{parameters}} for the complete parameter dataset
+#' @seealso [update_snirh_parameters()] for updating the parameter table
 #'
 #' @import data.table
 #' @export
 list_snirh_parameters <- function(sample_type = "all", include_conversion_info = FALSE) {
   # Validate inputs
-  valid_types <- c("water", "biota", "all")
-  if (!sample_type %in% valid_types) {
-    cli_abort("sample_type must be one of: {.val {valid_types}}")
+  valid_types <- c(VALID_SAMPLE_TYPES, "all")
+  if (!is.character(sample_type) || length(sample_type) != 1L || !sample_type %in% valid_types) {
+    cli_abort("{.arg sample_type} must be one of: {.val {valid_types}}")
   }
+  check_flag(include_conversion_info)
 
-  # Get parameters data
-  if (!exists("parameters")) {
-    cli_abort("Parameters dataset not available. Please ensure package is properly loaded.")
-  }
-
-  param_data <- copy(parameters)
+  param_data <- load_snirh_parameters()
 
   # Filter by sample type if not "all"
   if (sample_type != "all") {

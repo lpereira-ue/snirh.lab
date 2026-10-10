@@ -39,8 +39,9 @@ to SNIRH standards.
 The function performs several key operations:
 \itemize{
 \item Validates input data structure and removes empty rows
+\item Checks for missing values and duplicate measurements (same station,
+date, parameter and unit)
 \item Validates station IDs against SNIRH database (for surface.water and biota)
-\item Checks for duplicate measurements (same station, date, and parameter)
 \item Extracts pH temperature measurements when present
 \item Converts measurement values to SNIRH-compatible units
 \item Handles measurement flags (<, >, =) and special values
@@ -67,18 +68,26 @@ in order, and with no missing values:
 \describe{
 \item{snirh_entity}{Entity responsible for the data}
 \item{station_id}{Unique station identifier (must match SNIRH database)}
-\item{sampling_date}{Date and time of sampling (POSIXct recommended)}
+\item{sampling_date}{Date and time of sampling. POSIXct is recommended;
+Date and character values (e.g. "2024-01-15 10:30" or
+"15/01/2024 10:30") are also accepted.}
 \item{parameter}{Parameter name as used in laboratory}
-\item{unit}{Unit of measurement as used in laboratory}
+\item{unit}{Unit of measurement as used in laboratory (may be empty only
+for parameters without unit in the parameter table)}
 \item{value}{Measured value (may include flags like <, >)}
 }
+
+pH values may include the measurement temperature, e.g. "7.2 a 20.1 ºC";
+the temperature is then reported as a separate parameter.
 }
 
 \section{Parameter Conversion}{
 
-Relies on an internal \code{parameters} dataset that maps laboratory
-parameter names and units to SNIRH equivalents. This dataset must contain
-conversion factors and SNIRH symbols for all parameters in the input data.
+Relies on the SNIRH parameter conversion table, which maps laboratory
+parameter names and units to SNIRH equivalents (symbols and conversion
+factors). The table is maintained outside the package and updated
+automatically; see \code{\link[=update_snirh_parameters]{update_snirh_parameters()}}. All parameter/unit
+combinations in the input data must exist in the table.
 }
 
 \examples{

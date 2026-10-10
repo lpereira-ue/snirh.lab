@@ -1,20 +1,3 @@
-# Constants
-VALID_MATRICES <- c("surface.water", "biota")
-REQUIRED_COLUMNS <- c("snirh_entity", "station_id", "sampling_date",
-                      "parameter", "unit", "value")
-
-# Network configuration
-NETWORK_CONFIG <- list(
-  "surface.water" = list(network = "QUAL", sample_type = "water", validate_stations = TRUE),
-  "biota" = list(network = "QUAL", sample_type = "biota", validate_stations = TRUE)
-)
-
-# SNIRH Station URLs
-SNIRH_STATIONS_URL <- list(
-  "surface.water" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsup_vw.zip",
-  "biota" = "https://sniambgeoviewer.apambiente.pt/GeoDocs/shpzips/snirh_qualsup_vw.zip"
-)
-
 #' Convert data to SNIRH file format
 #'
 #' Cleans and converts laboratory data to the SNIRH (National
@@ -43,8 +26,9 @@ SNIRH_STATIONS_URL <- list(
 #' The function performs several key operations:
 #' \itemize{
 #'   \item Validates input data structure and removes empty rows
+#'   \item Checks for missing values and duplicate measurements (same station,
+#'     date, parameter and unit)
 #'   \item Validates station IDs against SNIRH database (for surface.water and biota)
-#'   \item Checks for duplicate measurements (same station, date, and parameter)
 #'   \item Extracts pH temperature measurements when present
 #'   \item Converts measurement values to SNIRH-compatible units
 #'   \item Handles measurement flags (<, >, =) and special values
@@ -68,16 +52,24 @@ SNIRH_STATIONS_URL <- list(
 #' \describe{
 #'   \item{snirh_entity}{Entity responsible for the data}
 #'   \item{station_id}{Unique station identifier (must match SNIRH database)}
-#'   \item{sampling_date}{Date and time of sampling (POSIXct recommended)}
+#'   \item{sampling_date}{Date and time of sampling. POSIXct is recommended;
+#'     Date and character values (e.g. "2024-01-15 10:30" or
+#'     "15/01/2024 10:30") are also accepted.}
 #'   \item{parameter}{Parameter name as used in laboratory}
-#'   \item{unit}{Unit of measurement as used in laboratory}
+#'   \item{unit}{Unit of measurement as used in laboratory (may be empty only
+#'     for parameters without unit in the parameter table)}
 #'   \item{value}{Measured value (may include flags like <, >)}
 #' }
 #'
+#' pH values may include the measurement temperature, e.g. "7.2 a 20.1 ºC";
+#' the temperature is then reported as a separate parameter.
+#'
 #' @section Parameter Conversion:
-#' Relies on an internal `parameters` dataset that maps laboratory
-#' parameter names and units to SNIRH equivalents. This dataset must contain
-#' conversion factors and SNIRH symbols for all parameters in the input data.
+#' Relies on the SNIRH parameter conversion table, which maps laboratory
+#' parameter names and units to SNIRH equivalents (symbols and conversion
+#' factors). The table is maintained outside the package and updated
+#' automatically; see [update_snirh_parameters()]. All parameter/unit
+#' combinations in the input data must exist in the table.
 #'
 #' @examples
 #' # Example data structure
@@ -100,54 +92,50 @@ SNIRH_STATIONS_URL <- list(
 #' }
 #'
 #' @importFrom cli cli_abort cli_alert_warning
-#' @importFrom utils download.file unzip
+#' @importFrom utils download.file
 #' @import data.table
 #' @export
 convert_to_snirh <- function(data, matrix, validate_stations = TRUE) {
   # Validate inputs
   if (!is.data.frame(data)) {
-    cli::cli_abort("{.arg data} must be a data.frame or data.table, not {.cls {class(data)}}.")
+    cli_abort("{.arg data} must be a data.frame or data.table, not {.cls {class(data)}}.")
   }
-  data <- as.data.table(data)
-
-  matrix <- match.arg(matrix, choices = c("surface.water", "biota"))
-
-  if (!is.logical(validate_stations) || length(validate_stations) != 1L || is.na(validate_stations)) {
-    cli_abort("{.arg validate_stations} must be a single TRUE/FALSE value.")
+  if (!is.character(matrix) || length(matrix) != 1L || !matrix %in% VALID_MATRICES) {
+    cli_abort("{.arg matrix} must be one of: {.val {VALID_MATRICES}}")
   }
-  
-  # Input validation
-  validate_inputs(data, matrix)
+  check_flag(validate_stations)
 
-  # Get network configuration
-  config <- NETWORK_CONFIG[[matrix]]
-
-  # Filter parameters for the specified sample type
-  relevant_params <- parameters[sample_type == config$sample_type]
-
-  # Convert to data.table and validate structure
+  # Convert to data.table (copy, so the user's data is never modified)
   data <- as.data.table(data)
   validate_data_structure(data)
 
-  # Validate stations against SNIRH database if required
-  if (validate_stations && config$validate_stations) {
-    validate_snirh_stations(data, matrix)
+  # Clean data (remove empty rows, trim whitespace)
+  data <- clean_empty_data(data)
+  if (nrow(data) == 0) {
+    cli_abort("Input data is empty")
   }
 
-  # Clean data (remove empty rows)
-  data_cleaned <- clean_empty_data(data)
+  # Get network configuration and the parameters for the sample type
+  config <- NETWORK_CONFIG[[matrix]]
+  relevant_params <- load_snirh_parameters()[sample_type == config$sample_type]
 
-  # Validate data integrity
-  validate_data_integrity(data_cleaned)
+  # Validate data integrity (missing values, duplicates, dates)
+  validate_data_integrity(data, relevant_params)
+  data[, sampling_date := parse_sampling_date(sampling_date)]
+
+  # Validate stations against SNIRH database if required
+  if (validate_stations && config$validate_stations) {
+    validate_snirh_stations(data)
+  }
 
   # Extract pH temperature data if present
-  data_with_ph_temp <- extract_ph_temperature(data_cleaned)
+  data <- extract_ph_temperature(data, relevant_params)
 
   # Clean and standardize values
-  data_with_ph_temp_cleaned <- clean_values(data_with_ph_temp)
+  data <- clean_values(data)
 
   # Convert to SNIRH units
-  data_converted <- convert_units(data_with_ph_temp_cleaned, relevant_params)
+  data_converted <- convert_units(data, relevant_params)
 
   # Format for SNIRH output
   data_final <- format_for_snirh(data_converted, config$network)
@@ -156,49 +144,28 @@ convert_to_snirh <- function(data, matrix, validate_stations = TRUE) {
 }
 
 
-#' Validate function inputs
-#' @param data Input data
-#' @param matrix Matrix type
-#' @noRd
-#' @keywords internal
-validate_inputs <- function(data, matrix) {
-  if (!matrix %in% VALID_MATRICES) {
-    cli_abort("Matrix type must be one of: {.val {VALID_MATRICES}}")
-  }
-
-  if (!is.data.frame(data)) {
-    cli_abort("Data object must be a data.frame or data.table")
-  }
-
-  if (nrow(data) == 0) {
-    cli_abort("Input data is empty")
-  }
-}
-
-
 #' Validate station IDs against SNIRH database
 #' @param data Input data.table
-#' @param matrix Matrix type
 #' @noRd
-validate_snirh_stations <- function(data, matrix) {
-  # Check internet connection
-  if (!check_internet_connection()) {
-    cli_abort(c(
-      "Internet connection required for station validation",
-      "i" = "Please check your connection or set validate_stations = FALSE"
-    ))
-  }
-
+validate_snirh_stations <- function(data) {
   # Get unique station IDs from data
-  data_stations <- trimws(unique(data$station_id))
+  data_stations <- unique(data$station_id)
   data_stations <- data_stations[!is.na(data_stations)]
 
   if (length(data_stations) == 0) {
     cli_abort("No valid station IDs found in data")
   }
 
+  # Check internet connection (only needed if the list is not cached)
+  if (is.null(.snirh_cache$stations) && !check_internet_connection()) {
+    cli_abort(c(
+      "Internet connection required for station validation",
+      "i" = "Please check your connection or set validate_stations = FALSE"
+    ))
+  }
+
   # Download SNIRH station data
-  snirh_stations <- download_snirh_stations(matrix)
+  snirh_stations <- download_snirh_stations()
 
   # Check which stations exist in SNIRH
   missing_stations <- setdiff(data_stations, snirh_stations$station_id)
@@ -211,10 +178,12 @@ validate_snirh_stations <- function(data, matrix) {
 
   # Check station status (must be ATIVA)
   station_status <- snirh_stations[station_id %in% data_stations]
-  inactive_stations <- station_status[status != "ATIVA"]
+  inactive_stations <- station_status[!status %in% "ATIVA"]
 
   if (nrow(inactive_stations) > 0) {
-    inactive_list <- inactive_stations[, paste0(station_id, " (", status, ")")]
+    inactive_list <- inactive_stations[, paste0(
+      station_id, " (", fifelse(is.na(status), "no status", status), ")"
+    )]
     cli_abort(c(
       "Station(s) not active in SNIRH database [{length(inactive_list)}]:",
       "x" = "{.val {inactive_list}}",
@@ -223,8 +192,7 @@ validate_snirh_stations <- function(data, matrix) {
     ))
   }
 
-  # Report station validation results
-  active_stations <- station_status[status == "ATIVA", .N]
+  invisible(TRUE)
 }
 
 
@@ -257,9 +225,16 @@ clean_empty_data <- function(data) {
   all_empty <- empty_mask[, Reduce(`&`, .SD)]
   data_cleaned <- data[!all_empty]
 
-  # Clean whitespace from key columns
-  data_cleaned[, station_id := trimws(station_id, whitespace = "[ \\h\\v\t\n\r]")]
-  data_cleaned[, value := trimws(value, whitespace = "[ \\h\\v\t\n\r]")]
+  # Clean whitespace (including non-breaking spaces) from text columns
+  ws <- "[\\h\\v]"
+  text_cols <- c("snirh_entity", "station_id", "parameter", "unit", "value")
+  data_cleaned[, (text_cols) := lapply(.SD, function(x) trimws(as.character(x), whitespace = ws)),
+               .SDcols = text_cols]
+
+  # Empty strings are missing values
+  for (col in text_cols) {
+    set(data_cleaned, i = which(data_cleaned[[col]] == ""), j = col, value = NA_character_)
+  }
 
   return(data_cleaned)
 }
@@ -267,81 +242,150 @@ clean_empty_data <- function(data) {
 
 #' Validate data integrity (nulls and duplicates)
 #' @param data Cleaned data.table
+#' @param relevant_params Parameters table filtered for sample type
 #' @noRd
 #' @keywords internal
-validate_data_integrity <- function(data) {
-  # Check for missing values (NA or blank) in required columns
-  # Exclude IGA parameter which has no unit
-  data_for_null_check <- data[parameter != "\u00CDNDICE DE GRUPO DE ALGAS (IGA)"]
+validate_data_integrity <- function(data, relevant_params) {
+  # Check for missing values in required columns. The unit may be missing only
+  # for parameters that have no unit in the parameter table (e.g. IGA).
+  no_unit_params <- relevant_params[is.na(unit_lab), unique(param_lab)]
+  is_missing <- function(x) is.na(x) | trimws(as.character(x)) == ""
 
-  null_counts <- data_for_null_check[,
-                                     lapply(.SD, function(x) sum(is.na(x) | trimws(as.character(x)) == "")),
-                                     .SDcols = REQUIRED_COLUMNS
-  ]
-  total_nulls <- sum(unlist(null_counts))
-  cols_nulls <- names(null_counts)[unlist(null_counts) > 0]
+  null_counts <- vapply(REQUIRED_COLUMNS, function(col) {
+    missing <- is_missing(data[[col]])
+    if (col == "unit") {
+      missing <- missing & !data$parameter %in% no_unit_params
+    }
+    sum(missing)
+  }, numeric(1))
 
-  if (total_nulls > 0) {
-    cli_abort(c(
-      "Required columns contain missing values: {.field {cols_nulls}}"
-    ))
+  if (sum(null_counts) > 0) {
+    cols_nulls <- names(null_counts)[null_counts > 0]
+    cli_abort("Required columns contain missing values: {.field {cols_nulls}}")
   }
 
   # Check for duplicates
-  dup_row <- anyDuplicated(data, by = c("station_id", "sampling_date", "parameter", "unit"))
-  if (dup_row > 0) {
-    cli_abort("Duplicate records found for same 'station_id + sampling_date + parameter + unit' combination")
+  dup_keys <- c("station_id", "sampling_date", "parameter", "unit")
+  dups <- data[duplicated(data, by = dup_keys)]
+  if (nrow(dups) > 0) {
+    dup_list <- unique(dups[, paste0(station_id, " | ", format(sampling_date), " | ", parameter)])
+    cli_abort(c(
+      "Duplicate records found for same 'station_id + sampling_date + parameter + unit' combination:",
+      "x" = "{.val {utils::head(dup_list, 10)}}{if (length(dup_list) > 10) ' ...'}"
+    ))
   }
+
+  invisible(TRUE)
+}
+
+
+#' Convert sampling dates to POSIXct
+#'
+#' POSIXct values are kept as they are. Dates are converted to midnight and
+#' character values are parsed with common date/time formats.
+#'
+#' @param x Vector of sampling dates
+#' @return POSIXct vector
+#' @noRd
+#' @keywords internal
+parse_sampling_date <- function(x) {
+  if (inherits(x, "POSIXct")) {
+    return(x)
+  }
+  if (inherits(x, "POSIXlt")) {
+    return(as.POSIXct(x))
+  }
+  if (inherits(x, "Date")) {
+    return(as.POSIXct(format(x, "%Y-%m-%d"), tz = "UTC"))
+  }
+  if (!is.character(x)) {
+    cli_abort(c(
+      "{.field sampling_date} must be a date-time (POSIXct), Date or character, not {.cls {class(x)}}."
+    ))
+  }
+
+  # Accepted: YYYY-MM-DD or DD-MM-YYYY ("/" also allowed), optionally followed
+  # by HH:MM or HH:MM:SS. The format is chosen for each value, so that dates
+  # are never silently misread (e.g. "15-01-2024" as year 15).
+  x_norm <- gsub("/", "-", trimws(x), fixed = TRUE)
+  ymd <- grepl("^\\d{4}-\\d{1,2}-\\d{1,2}(\\s|$)", x_norm, perl = TRUE)
+  dmy <- grepl("^\\d{1,2}-\\d{1,2}-\\d{4}(\\s|$)", x_norm, perl = TRUE)
+  time <- sub("^\\S+\\s*", "", x_norm)
+  hms <- grepl("^\\d{1,2}:\\d{2}:\\d{2}(\\.\\d+)?$", time, perl = TRUE)
+  hm <- grepl("^\\d{1,2}:\\d{2}$", time, perl = TRUE)
+
+  fmt <- paste0(
+    fifelse(ymd, "%Y-%m-%d", "%d-%m-%Y"),
+    fifelse(hms, " %H:%M:%OS", fifelse(hm, " %H:%M", ""))
+  )
+  valid <- (ymd | dmy) & (hms | hm | time == "")
+
+  parsed <- as.POSIXct(rep(NA_real_, length(x)), tz = "UTC")
+  for (f in unique(fmt[valid])) {
+    i <- which(valid & fmt == f)
+    parsed[i] <- as.POSIXct(x_norm[i], format = f, tz = "UTC")
+  }
+
+  if (anyNA(parsed)) {
+    cli_abort(c(
+      "Could not parse {.field sampling_date}: {.val {utils::head(unique(x[is.na(parsed)]), 5)}}",
+      "i" = "Use POSIXct values or a format such as {.val 2024-01-15 10:30} or {.val 15/01/2024 10:30}."
+    ))
+  }
+
+  parsed
 }
 
 
 #' Extract pH temperature measurements
+#'
+#' pH values can include the measurement temperature (e.g. "7.2 a 20.1 ºC").
+#' The temperature is added as a new row ("Temperatura do pH" or
+#' "Temperatura do pH - Campo").
+#'
 #' @param data Input data.table
+#' @param relevant_params Parameters table filtered for sample type
 #' @return Data.table with pH temperature extracted as separate rows
 #' @noRd
 #' @keywords internal
-extract_ph_temperature <- function(data) {
+extract_ph_temperature <- function(data, relevant_params) {
   # Find pH measurements with temperature data
-  temp_ph <- data[parameter %like% "pH" & value %like% "a"]
+  has_temp <- grepl("pH", data$parameter, fixed = TRUE) &
+    grepl("\\s+a\\s+", data$value)
 
-  if (nrow(temp_ph) == 0) {
+  if (!any(has_temp)) {
     return(data)
   }
 
-  # Split pH and temperature values
-  temp_ph[, c("ph", "temp_ph") := tstrsplit(value, " a ", fixed = TRUE)]
-  temp_ph[, c("temp_ph", "unit") := tstrsplit(temp_ph, "\u00BA", fixed = TRUE)]
-  temp_ph[, `:=`(
-    ph = trimws(ph),
-    temp_ph = trimws(temp_ph)
-  )]
+  temp_ph <- data[has_temp]
 
-  # Validate temperature unit
-  if (nrow(temp_ph[unit != "C"]) > 0) {
-    cli_abort("pH temperature values must be in Celsius (\u00B0C)")
+  # Temperature: text after " a ", must be in degrees Celsius
+  temp_value <- trimws(sub("^.*?\\s+a\\s+", "", temp_ph$value, perl = TRUE))
+  celsius <- "\\s*[\u00BA\u00B0]\\s*C$"
+  invalid <- !grepl(paste0("^-?[0-9]+([.,][0-9]+)?", celsius), temp_value)
+
+  if (any(invalid)) {
+    cli_abort(c(
+      "pH temperature values must be in Celsius (e.g. {.val 7.2 a 20.1 \u00baC}).",
+      "x" = "Invalid value{?s}: {.val {unique(temp_ph$value[invalid])}}"
+    ))
   }
 
-  # Convert temperature data to proper format
-  temp_ph[, unit := "\u00BAC"]
-  temp_ph <- merge(temp_ph,
-                   parameters[, .(param_lab, param_snirh)],
-                   by.x = "parameter", by.y = "param_lab",
-                   all.x = TRUE)
+  temp_ph[, `:=`(
+    value = sub(celsius, "", temp_value),
+    unit = "\u00BAC"
+  )]
 
+  # Name of the temperature parameter, according to the SNIRH pH parameter
+  ph_snirh <- relevant_params$param_snirh[match(temp_ph$parameter, relevant_params$param_lab)]
   temp_ph[, parameter := fcase(
-    param_snirh == "pH - campo", "Temperatura do pH - Campo",
-    param_snirh == "pH - lab.", "Temperatura do pH",
+    ph_snirh %in% "pH - campo", "Temperatura do pH - Campo",
+    ph_snirh %in% "pH - lab.", "Temperatura do pH",
     default = paste0("Temperatura do ", parameter)
   )]
 
-  # Clean up and prepare for binding
-  temp_ph[, c("param_snirh", "ph", "value") := NULL]
-  setnames(temp_ph, "temp_ph", "value")
-
   # Combine original data with temperature data
-  data_all <- rbindlist(list(data, temp_ph), use.names = TRUE)
-
-  return(data_all)
+  rbindlist(list(data, temp_ph), use.names = TRUE)
 }
 
 
@@ -355,10 +399,10 @@ clean_values <- function(data) {
 
   # Apply cleaning transformations
   cleaning_rules <- list(
-    "," = "\\.",              # Replace comma with period
-    "\\=" = "",               # Remove equals signs
+    "," = ".",                # Replace comma with period
+    "=" = "",                 # Remove equals signs
     "\\(LQ\\)" = "",          # Remove detection limit indicators
-    "\u00BAC" = "",           # Remove temperature unit from values
+    "[\u00BA\u00B0]C" = "",   # Remove temperature unit from values
     "Ausente" = "0",          # Convert absence indicators
     "Presente" = ">0",        # Convert presence indicators
     "\u2264" = "<",           # Convert less-than-or-equal symbols
@@ -370,15 +414,12 @@ clean_values <- function(data) {
     data[, value_clean := gsub(pattern, replacement, value_clean)]
   }
 
-  # Handle uncertainty indicators (\u00B1) and temperature ranges
-  data[, value_clean := tstrsplit(value_clean, "\u00B1", fixed = TRUE)[[1]]]
-  data[, value_clean := tstrsplit(value_clean, " a ", fixed = TRUE)[[1]]]
+  # Handle uncertainty indicators (\u00B1) and temperature ranges ("7.2 a 20.1")
+  data[, value_clean := sub("\u00B1.*$", "", value_clean)]
+  data[, value_clean := sub("\\s+a\\s+.*$", "", value_clean)]
 
   # Remove all whitespace
   data[, value_clean := gsub("\\s+", "", value_clean)]
-
-  # Reorder columns for clarity
-  setcolorder(data, "value", after = "unit")
 
   return(data)
 }
@@ -386,26 +427,28 @@ clean_values <- function(data) {
 
 #' Convert values to SNIRH units
 #' @param data Data.table with cleaned values
-#' @param relevant_params Parameters dataset filtered for sample type
+#' @param relevant_params Parameters table filtered for sample type
 #' @return Data.table with converted values
 #' @noRd
 #' @keywords internal
 convert_units <- function(data, relevant_params) {
   # Separate flags from numeric values
-  data[, `:=`(
-    flag = fifelse(
-      substr(value_clean, 1, 1) %in% c("<", ">"),
-      substr(value_clean, 1, 1),
-      NA_character_
-    ),
-    value_clean = as.double(gsub("[\\<\\>]", "", value_clean))
+  data[, flag := fifelse(
+    substr(value_clean, 1, 1) %in% c("<", ">"),
+    substr(value_clean, 1, 1),
+    NA_character_
   )]
+  data[, value_num := suppressWarnings(as.double(sub("^[<>]", "", value_clean)))]
 
-  # Join with parameters for unit conversion
-  data_converted <- merge(data, relevant_params,
-                          by.x = c("parameter", "unit"),
-                          by.y = c("param_lab", "unit_lab"),
-                          all.x = TRUE)
+  # Check for values that are not numeric
+  invalid <- data[is.na(value_num)]
+  if (nrow(invalid) > 0) {
+    invalid_list <- unique(invalid[, paste0(parameter, ": ", value)])
+    cli_abort(c(
+      "Non-numeric values found [{length(invalid_list)}]:",
+      "x" = "{.val {utils::head(invalid_list, 10)}}{if (length(invalid_list) > 10) ' ...'}"
+    ))
+  }
 
   # Check for unconverted parameters
   data_not_converted <- data[!relevant_params,
@@ -417,13 +460,43 @@ convert_units <- function(data, relevant_params) {
     cli_abort("Parameters not found in conversion table [{length(failed_params)}]: {.val {sort(failed_params)}}")
   }
 
-  # Apply conversion factors
-  data_converted[, value_converted := value_clean * factor]
+  # Join with parameters for unit conversion
+  data_converted <- merge(data, relevant_params,
+                          by.x = c("parameter", "unit"),
+                          by.y = c("param_lab", "unit_lab"),
+                          all.x = TRUE)
 
-  # Create final value with flags
-  data_converted[, value_final := paste0(fifelse(is.na(flag), "", flag), value_converted)]
+  # Different laboratory parameters can map to the same SNIRH symbol; there
+  # can be only one value per station, date and symbol
+  dup_keys <- c("station_id", "sampling_date", "snirh_entity", "symbol_snirh")
+  dups <- data_converted[duplicated(data_converted, by = dup_keys)]
+  if (nrow(dups) > 0) {
+    dup_list <- unique(dups[, paste0(station_id, " | ", format(sampling_date), " | ", symbol_snirh)])
+    cli_abort(c(
+      "More than one value for the same SNIRH parameter (station | date | symbol):",
+      "x" = "{.val {utils::head(dup_list, 10)}}{if (length(dup_list) > 10) ' ...'}",
+      "i" = "Check for different laboratory parameters that map to the same SNIRH symbol."
+    ))
+  }
+
+  # Apply conversion factors
+  data_converted[, value_converted := value_num * factor]
+
+  # Create final value with flags (avoid scientific notation)
+  data_converted[, value_final := paste0(fifelse(is.na(flag), "", flag),
+                                         format_number(value_converted))]
 
   return(data_converted)
+}
+
+
+#' Format numbers without scientific notation and floating point noise
+#' @param x Numeric vector
+#' @return Character vector
+#' @noRd
+#' @keywords internal
+format_number <- function(x) {
+  trimws(formatC(x, format = "fg", digits = 15))
 }
 
 
@@ -452,7 +525,7 @@ format_for_snirh <- function(data_converted, network) {
   setnames(data_formatted, c("std", "snirh_entity"), c("STD", "RESPONSAVEL"))
 
   # Validate final conversion
-  nrow_final <- sum(rowSums(!is.na(data_formatted[, -(1:2)])))
+  nrow_final <- sum(!is.na(as.matrix(data_formatted[, -(1:2)])))
   if (nrow(data_converted) != nrow_final) {
     cli_abort("Data lost during template formatting")
   }
@@ -471,80 +544,25 @@ apply_snirh_template <- function(data_wide, network) {
   dt_out <- copy(data_wide)
   setorder(dt_out, station_id, sampling_date)
 
-  # Add station markers
-  dt_out[, station := fifelse(
-    (shift(station_id) != station_id) | is.na(shift(station_id)),
-    paste0("ESTACAO=", station_id),
-    NA_character_
-  )]
-
-  # Add indexing and positioning
-  setcolorder(dt_out, "station", before = 1)
-  dt_out[, index := rowid(station_id)]
-  setcolorder(dt_out, "index", before = 1)
-
-  # Insert station headers
-  dt_out <- insert_station_headers(dt_out)
-
   # Format timestamps
-  dt_out[, std := fifelse(!is.na(std),
-                          std,
-                          format(sampling_date, "%d/%m/%Y %H:%M"))]
+  dt_out[, std := format(sampling_date, "%d/%m/%Y %H:%M")]
+  dt_out[, sampling_date := NULL]
 
-  # Clean up columns
-  dt_out[, c("index", "station", "station_id", "sampling_date") := NULL]
+  # One block per station, preceded by a "ESTACAO=" line
+  blocks <- split(dt_out, by = "station_id", keep.by = FALSE)
+  dt_out <- rbindlist(lapply(names(blocks), function(id) {
+    rbindlist(list(data.table(std = paste0("ESTACAO=", id)), blocks[[id]]), fill = TRUE)
+  }), fill = TRUE)
 
   # Reorder columns
   setcolorder(dt_out, c("std", "snirh_entity",
-                        sort(names(dt_out)[!names(dt_out) %in% c("std", "snirh_entity")])))
+                        sort(setdiff(names(dt_out), c("std", "snirh_entity")))))
 
   # Add network header
   dt_out <- rbindlist(list(
     data.table("std" = paste0("REDE=", network)),
     dt_out
   ), fill = TRUE)
-
-  return(dt_out)
-}
-
-
-#' Insert station headers into formatted data
-#' @param dt_out Data.table with station information
-#' @return Data.table with station headers inserted
-#' @noRd
-#' @keywords internal
-insert_station_headers <- function(dt_out) {
-  # Find positions for station headers
-  breaks <- which(dt_out$index == 1)
-  new_lines <- dt_out$station[breaks]
-
-  # Add std column
-  dt_out[, std := NA]
-  setcolorder(dt_out, c("index", "std", names(dt_out)[!names(dt_out) %in% c("index", "std")]))
-
-  # Insert headers
-  if (length(breaks) > 0) {
-    # First station
-    dt_aux <- rbindlist(list(
-      data.table("std" = new_lines[1]),
-      dt_out
-    ), fill = TRUE)
-
-    # Additional stations
-    if (length(breaks) > 1) {
-      for (i in 2:length(breaks)) {
-        pos <- breaks[i] + i - 1
-        new_row <- data.table("std" = new_lines[i])
-
-        # Split and recombine
-        dt_before <- dt_aux[1:(pos - 1)]
-        dt_after <- dt_aux[pos:.N]
-        dt_aux <- rbindlist(list(dt_before, new_row, dt_after), fill = TRUE)
-      }
-    }
-
-    return(dt_aux)
-  }
 
   return(dt_out)
 }

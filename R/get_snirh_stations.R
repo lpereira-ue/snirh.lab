@@ -1,33 +1,40 @@
 #' Get SNIRH station information
 #'
-#' Downloads and returns information about SNIRH monitoring stations for
-#' surface water quality. This function can be used to check station status,
-#' get available station IDs, or validate stations before data conversion.
+#' Downloads and returns information about SNIRH water quality monitoring
+#' stations. This function can be used to check station status, get available
+#' station IDs, or validate stations before data conversion.
 #'
 #' @param matrix Character string specifying the matrix type. Currently supports
-#'   "surface.water" and "biota" (both use the same station database).
-#' @param active_only Logical. If TRUE, returns only active stations (Estado = "ATIVA").
-#'   If FALSE, returns all stations. Default is FALSE.
+#'   "surface.water" and "biota" (both use the same station list).
+#' @param active_only Logical. If TRUE, returns only active stations
+#'   (status = "ATIVA"). If FALSE, returns all stations. Default is FALSE.
+#' @param refresh Logical. If TRUE, downloads the station list again even if it
+#'   was already downloaded in the current R session. Default is FALSE.
 #'
-#' @return A data.table with station information containing:
+#' @return A data.table with one row per station and the columns:
 #'   \describe{
-#'     \item{station_id}{Station identifier (corresponds to "Código" in SNIRH)}
+#'     \item{station_id}{Station identifier ("Código" in SNIRH)}
+#'     \item{station_name}{Station name}
+#'     \item{basin}{River basin}
+#'     \item{altitude_m}{Altitude (m)}
+#'     \item{latitude, longitude}{Coordinates (decimal degrees, WGS84)}
+#'     \item{entity}{Entity responsible for the station}
+#'     \item{district, municipality, parish}{Administrative location}
+#'     \item{river}{River name}
+#'     \item{drainage_area_km2}{Drainage area (km2)}
+#'     \item{distance_to_mouth_km}{Distance to the river mouth (km)}
+#'     \item{start_date}{Date the station started operating}
+#'     \item{end_date}{Date the station was closed}
+#'     \item{purpose}{Monitoring purpose}
 #'     \item{status}{Station status (e.g., "ATIVA", "DESATIVADA", "EXTINTA")}
 #'   }
 #'
 #' @details
-#' Downloads the latest station information from the SNIAmb WFS service.
-#' It requires an internet connection.
-#'
-#' The download/parsing step uses the 'sf' package internally; if 'sf' is not
-#' installed, the function will abort with a clear message.
-#'
-#' The station database includes information about:
-#' \itemize{
-#'   \item Station location (coordinates)
-#'   \item Station status (active/inactive)
-#'   \item Station metadata
-#' }
+#' Downloads the latest station list (CSV) from the SNIRH website
+#' (<https://snirh.apambiente.pt>). It requires an internet connection. The
+#' list is cached for the rest of the R session, so subsequent calls (including
+#' those made by [convert_to_snirh()] and [check_station_status()]) are fast.
+#' Use `refresh = TRUE` to force a new download.
 #'
 #' @section Station Status:
 #' Stations can have different status values:
@@ -60,23 +67,26 @@
 #' @importFrom cli cli_abort
 #' @import data.table
 #' @export
-get_snirh_stations <- function(matrix = "surface.water", active_only = FALSE) {
+get_snirh_stations <- function(matrix = "surface.water", active_only = FALSE,
+                               refresh = FALSE) {
   # Validate inputs
-  if (!matrix %in% c("surface.water", "biota")) {
-    cli_abort("Matrix must be 'surface.water' or 'biota'")
+  if (!is.character(matrix) || length(matrix) != 1L || !matrix %in% VALID_MATRICES) {
+    cli_abort("{.arg matrix} must be one of: {.val {VALID_MATRICES}}")
   }
+  check_flag(active_only)
+  check_flag(refresh)
 
-  # Check internet connectivity
-  if (!check_internet_connection()) {
+  # Check internet connectivity (only needed if the list is not cached)
+  if ((refresh || is.null(.snirh_cache$stations)) && !check_internet_connection()) {
     cli_abort("Internet connection required to download station data")
   }
 
   # Download station data
-  stations <- download_snirh_stations(matrix)
+  stations <- download_snirh_stations(refresh = refresh)
 
   # Filter for active stations if requested
   if (active_only) {
-    stations <- stations[status == "ATIVA"]
+    stations <- stations[status %in% "ATIVA"]
   }
 
   return(stations)
