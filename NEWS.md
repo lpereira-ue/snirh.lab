@@ -1,4 +1,4 @@
-# snirh.lab 0.1.0.9000
+# snirh.lab 0.2.0
 
 ### Breaking changes
 * The `parameters` dataset was removed. The parameter conversion table is now
